@@ -11,332 +11,501 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Roboto+Condensed:wght@400;500&family=Yellowtail&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0b0b0b;
-    --board: #151311;
-    --rule: #3a3128;
-    --amber: #e9a13b;
-    --cream: #efe6d6;
-    --grey: #9c9286;
+    --bg: #231c16;        /* warm espresso brown */
+    --bg-2: #2d241c;
+    --bg-3: #3a2f25;
+    --rule: #4a3d30;
+    --amber: #eaa23c;
+    --amber-2: #f5b95c;
+    --cream: #f3ead8;
+    --grey: #b6a894;
+    --head: 64px;
   }
   * { box-sizing: border-box; }
+  html { scroll-padding-top: var(--head); }
+  html.snap { scroll-snap-type: y proximity; }
   body {
-    margin: 0;
-    background: var(--ink);
-    color: var(--cream);
-    font: 400 16px/1.45 "Roboto Condensed", "Arial Narrow", sans-serif;
+    margin: 0; background: var(--bg); color: var(--cream);
+    font: 400 16px/1.5 "Roboto Condensed", "Arial Narrow", sans-serif;
   }
   a { color: inherit; }
   img { display: block; max-width: 100%; }
+  [hidden] { display: none !important; }
+  a:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  h1, h2, h3 { font-family: "Oswald", sans-serif; font-weight: 500; text-transform: uppercase; margin: 0; letter-spacing: .5px; }
+  .script { font-family: "Yellowtail", cursive; text-transform: none; color: var(--amber); font-weight: 400; letter-spacing: 0; }
 
-  /* header */
-  header {
-    max-width: 1100px; margin: 0 auto; padding: 18px 20px 0;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  /* ---------- header ---------- */
+  header.top {
+    position: sticky; top: 0; z-index: 30; height: var(--head);
+    background: rgba(35,28,22,.94); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
   }
-  header img { width: 150px; mix-blend-mode: lighten; }
-  nav { display: flex; gap: 28px; }
-  nav a {
-    font: 500 18px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase;
-    text-decoration: none; color: var(--grey); padding: 6px 0;
-    border-bottom: 2px solid transparent;
+  header.top .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  header.top img { width: 120px; }
+  nav.pages { display: flex; gap: 26px; }
+  nav.pages a {
+    font: 500 17px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase;
+    text-decoration: none; color: var(--grey); padding: 6px 0; border-bottom: 2px solid transparent;
   }
-  nav a:hover { color: var(--cream); }
-  nav a[aria-current="page"] { color: var(--amber); border-color: var(--amber); }
+  nav.pages a:hover { color: var(--cream); }
+  nav.pages a[aria-current] { color: var(--amber); border-color: var(--amber); }
 
-  .strap {
-    max-width: 1100px; margin: 18px auto 0; padding: 0 20px;
-    display: flex; align-items: center; gap: 14px;
-    font: 500 15px "Oswald", sans-serif; letter-spacing: 5px; text-transform: uppercase;
-  }
-  .strap::before, .strap::after { content: ""; flex: 1; height: 1px; background: var(--amber); opacity: .6; }
-  .strap span { color: var(--amber); }
-
-  .notice {
-    max-width: 1100px; margin: 14px auto 0; padding: 0 20px;
-    font-size: 15px; color: var(--grey); text-align: center;
-  }
+  /* ---------- menu: one dish per screen ---------- */
+  .menu-intro { text-align: center; padding: 56px 20px 40px; scroll-snap-align: start; }
+  .menu-intro img { width: min(300px, 70vw); margin: 0 auto; }
+  .strap { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px;
+    font: 500 15px "Oswald", sans-serif; letter-spacing: 5px; text-transform: uppercase; }
+  .strap::before, .strap::after { content: ""; width: 60px; height: 1px; background: var(--amber); }
+  .menu-intro p { color: var(--grey); max-width: 520px; margin: 16px auto 0; }
+  .halal { display: inline-block; margin-top: 18px; border: 1px solid var(--amber); color: var(--amber);
+    border-radius: 30px; padding: 3px 14px; font: 500 13px "Oswald", sans-serif; letter-spacing: 2px; }
+  .notice { margin: 22px auto 0; max-width: 640px; font-size: 15px; color: var(--grey);
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 10px 0; }
   .notice b { color: var(--cream); font-weight: 500; }
   .notice a { color: var(--amber); }
+  .scroll-hint { margin-top: 26px; font: 500 13px "Oswald", sans-serif; letter-spacing: 3px; color: var(--amber); text-transform: uppercase; }
+  .scroll-hint span { display: block; font-size: 20px; animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
 
-  /* the menu sheet */
-  .sheet {
-    max-width: 1100px; margin: 22px auto 0; padding: 0 20px;
+  .cats {
+    position: sticky; top: var(--head); z-index: 20;
+    background: var(--bg); border-bottom: 1px solid var(--rule);
+    display: flex; gap: 22px; overflow-x: auto; padding: 0 20px; scrollbar-width: none;
+    justify-content: safe center;
   }
-  .board {
-    background: var(--board);
-    border: 1px solid var(--rule);
-    outline: 1px solid var(--rule); outline-offset: -8px;
-    padding: 34px 34px 26px;
-    position: relative;
+  .cats::-webkit-scrollbar { display: none; }
+  .cats a { flex: none; text-decoration: none; padding: 11px 0 9px; border-bottom: 2px solid transparent;
+    font: 500 14px "Oswald", sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); }
+  .cats a.on { color: var(--amber); border-color: var(--amber); }
+
+  .cat-title { scroll-snap-align: start; padding: 54px 20px 18px; text-align: center; }
+  .cat-title h2 { font-size: clamp(34px, 6vw, 56px); color: var(--amber); line-height: 1; }
+  .cat-title p { color: var(--grey); margin: 8px 0 0; }
+
+  .dish {
+    position: relative; scroll-snap-align: start;
+    height: calc(100svh - var(--head) - 44px); min-height: 460px; max-height: 900px;
+    margin: 0 auto 14px; max-width: 1120px; overflow: hidden; border-radius: 6px;
+    background: var(--bg-2);
   }
-  .halal {
-    position: absolute; top: 20px; right: 22px;
-    width: 58px; height: 58px; border-radius: 50%;
-    background: var(--amber); color: var(--ink);
-    display: grid; place-items: center; text-align: center;
-    font: 600 11px/1.1 "Oswald", sans-serif; letter-spacing: 1px;
-  }
-  .halal span { font-size: 18px; display: block; font-weight: 500; }
+  .dish img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .dish::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(28,22,17,.96) 0%, rgba(28,22,17,.75) 30%, rgba(28,22,17,0) 62%); }
+  .dish .info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 32px 36px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+  .dish .num { font: 500 13px "Oswald", sans-serif; letter-spacing: 3px; color: var(--amber); }
+  .dish h3 { font-size: clamp(30px, 5vw, 52px); line-height: 1.02; margin: 4px 0 8px; }
+  .dish p { margin: 0; color: #e0d4c0; max-width: 46ch; font-size: 17px; }
+  .prices { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .price { background: rgba(35,28,22,.85); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 8px 14px; text-align: center; min-width: 84px; }
+  .price small { display: block; font-size: 12px; color: var(--grey); text-transform: uppercase; letter-spacing: 1px; }
+  .price b { font: 500 24px "Oswald", sans-serif; color: var(--amber); }
 
-  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 34px; }
-  .cols > div + div { border-left: 1px solid var(--rule); padding-left: 34px; }
+  .side-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .side { background: var(--bg-2); border-radius: 6px; overflow: hidden; }
+  .side img { aspect-ratio: 4/3; width: 100%; object-fit: cover; }
+  .side div { padding: 12px 14px 14px; }
+  .side h3 { font-size: 18px; }
+  .side p { margin: 2px 0 0; color: var(--amber); font: 500 15px "Oswald", sans-serif; }
+  .plain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  .plain div { background: var(--bg-2); border-radius: 6px; padding: 14px; display: flex; justify-content: space-between; gap: 10px; }
+  .plain h3 { font-size: 17px; }
+  .plain span { color: var(--amber); font: 500 15px "Oswald", sans-serif; text-align: right; }
+  .full-house { margin: 0 auto 14px; max-width: 1120px; background: var(--amber); color: var(--bg); border-radius: 6px;
+    padding: 14px 22px; display: flex; justify-content: space-between; font: 500 18px "Oswald", sans-serif; text-transform: uppercase; }
 
-  h2 {
-    font: 500 22px "Oswald", sans-serif; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--amber); margin: 0 0 10px;
-  }
-  h2:not(:first-child) { margin-top: 30px; }
+  .motd { text-align: center; padding: 60px 20px; scroll-snap-align: start; }
+  .motd .script { font-size: clamp(44px, 8vw, 76px); line-height: 1; transform: rotate(-3deg); display: inline-block; }
+  .motd .script span { display: block; color: var(--cream); font-size: .7em; padding-left: 1.2em; }
+  .motd p { color: var(--grey); margin: 18px 0 0; }
 
-  .it { padding: 10px 0 12px; border-bottom: 1px solid var(--rule);
-    display: grid; grid-template-columns: 1fr auto; column-gap: 14px; align-items: start; }
-  .it:last-child { border-bottom: 0; }
-  .row { display: contents; }
-  .it h3 { grid-column: 1; }
-  .it .pr { grid-column: 2; grid-row: 1 / span 2; }
-  .it p { grid-column: 1; }
-  .it h3 {
-    font: 500 17px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px;
-    margin: 0;
-  }
-  .it p { margin: 3px 0 0; color: var(--grey); font-size: 14px; max-width: 30ch; }
-  .pr { font: 500 15px "Oswald", sans-serif; white-space: nowrap; text-align: right; }
-  .pr small { color: var(--grey); font: 400 13px "Roboto Condensed", sans-serif; margin-right: 6px; }
-  .pr div + div { margin-top: 1px; }
+  /* ---------- catering ---------- */
+  .hero-sm { padding: 56px 0 30px; }
+  .hero-sm h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.05; }
+  .hero-sm h1 .script { display: block; font-size: 1.15em; }
+  .hero-sm p { color: var(--grey); max-width: 600px; font-size: 18px; margin: 14px 0 0; }
+  .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 40px 0 16px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+  .sec-h h2 { font-size: 28px; color: var(--amber); }
+  .sec-h p { margin: 0; color: var(--grey); font-size: 15px; }
 
-  .gatsby { border: 1px solid var(--amber); border-radius: 6px; padding: 14px 16px 10px; margin-top: 30px; }
-  .gatsby h2 { margin: 0 0 4px; }
-  .gatsby table { width: 100%; border-collapse: collapse; }
-  .gatsby th { font: 400 12px "Oswald", sans-serif; letter-spacing: 1px; color: var(--grey); text-align: right; }
-  .gatsby td { padding: 6px 0; font: 500 15px "Oswald", sans-serif; text-transform: uppercase; }
-  .gatsby td + td { text-align: right; width: 56px; }
-  .gatsby .add { border-top: 1px solid var(--rule); padding-top: 9px; margin-top: 4px; display: flex; justify-content: space-between; font: 500 14px "Oswald", sans-serif; text-transform: uppercase; }
-  .gatsby .add small { color: var(--grey); font-family: "Roboto Condensed"; text-transform: none; }
+  .places { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .place { position: relative; border-radius: 6px; overflow: hidden; grid-column: span 2; aspect-ratio: 4/3; }
+  .place.big { grid-column: span 3; aspect-ratio: 16/10; }
+  .place img { width: 100%; height: 100%; object-fit: cover; }
+  .place::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(28,22,17,.9), transparent 55%); }
+  .place div { position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 1; }
+  .place h3 { font-size: 21px; }
+  .place p { margin: 0; color: #ddd0bb; font-size: 14px; }
 
-  .script { font: 400 34px/1 "Yellowtail", cursive; color: var(--amber); margin: 26px 0 0; transform: rotate(-4deg); transform-origin: left; }
-  .script span { display: block; color: var(--cream); font-size: 26px; padding-left: 40px; }
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .tier { background: var(--bg-2); border: 1px solid var(--rule); border-radius: 8px; padding: 22px; display: flex; flex-direction: column; }
+  .tier.feat { border-color: var(--amber); }
+  .tier h3 { font-size: 22px; }
+  .tier .pp { margin: 10px 0 2px; font: 500 46px/1 "Oswald", sans-serif; color: var(--amber); }
+  .tier .pp small { font-size: 16px; color: var(--grey); font-family: "Roboto Condensed"; margin-left: 4px; }
+  .tier ul { list-style: none; padding: 0; margin: 14px 0 0; }
+  .tier li { padding: 8px 0; border-top: 1px solid var(--rule); font-size: 15px; }
+  .tier li b { font-weight: 500; color: var(--cream); }
+  .tier li span { color: var(--grey); }
+  .tier .ex { margin-top: auto; padding-top: 14px; color: var(--grey); font-size: 14px; }
 
-  /* catering */
-  .cat-intro { max-width: 620px; }
-  .cat-intro h1 { font: 500 40px/1.1 "Oswald", sans-serif; text-transform: uppercase; margin: 0 0 10px; }
-  .cat-intro h1 em { display: block; font: 400 46px/1.2 "Yellowtail", cursive; color: var(--amber); text-transform: none; }
-  .cat-intro p { color: var(--grey); margin: 0; font-size: 17px; }
-  .cat { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-top: 30px; }
-  .cat > div + div { border-left: 1px solid var(--rule); padding-left: 40px; }
-  .cat ul { list-style: none; margin: 0; padding: 0; }
-  .cat li { padding: 9px 0; border-bottom: 1px solid var(--rule); font: 500 17px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; }
-  .cat li:last-child { border: 0; }
-  .ask { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
-  .ask p { margin: 0; color: var(--grey); max-width: 46ch; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
-    background: var(--amber); color: var(--ink); padding: 11px 20px; border-radius: 4px;
-    font: 500 16px "Oswald", sans-serif; letter-spacing: 1px; text-transform: uppercase;
-  }
-  .btn:hover { background: #f3b459; }
+  .courses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  .course { background: var(--bg-2); border-radius: 6px; overflow: hidden; }
+  .course img { aspect-ratio: 3/2; width: 100%; object-fit: cover; }
+  .course div { padding: 14px 16px 16px; }
+  .course small { color: var(--amber); font: 500 12px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase; }
+  .course h3 { font-size: 20px; margin-top: 2px; }
+  .course p { margin: 4px 0 0; color: var(--grey); font-size: 15px; }
+  .fine { color: var(--grey); font-size: 14px; margin: 14px 0 0; }
+
+  .cta { margin: 44px 0 0; background: var(--bg-3); border-radius: 8px; padding: 26px 28px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+  .cta h2 { font-size: 28px; }
+  .cta p { margin: 4px 0 0; color: var(--grey); }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px; padding: 11px 20px;
+    font: 500 16px "Oswald", sans-serif; letter-spacing: 1px; text-transform: uppercase; background: var(--amber); color: var(--bg); border: 0; cursor: pointer; }
+  .btn:hover { background: var(--amber-2); }
   .btn.alt { background: none; color: var(--cream); border: 1px solid var(--rule); }
 
-  /* footer bar like the printed menu */
-  footer { max-width: 1100px; margin: 0 auto; padding: 0 20px 110px; }
-  .bar {
-    border: 1px solid var(--rule); border-top: 0;
-    display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 16px;
-    padding: 16px 34px; background: #0f0e0c;
-  }
-  .bar div { font: 500 16px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; }
-  .bar small { display: block; color: var(--grey); font: 400 13px "Roboto Condensed", sans-serif; text-transform: none; letter-spacing: 0; }
-  .bar a { text-decoration: none; }
-  .bar a:hover { color: var(--amber); }
+  /* ---------- about ---------- */
+  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; padding: 56px 0 10px; }
+  .about img { border-radius: 8px; aspect-ratio: 4/5; object-fit: cover; width: 100%; }
+  .about h1 { font-size: clamp(36px, 5vw, 54px); line-height: 1.05; }
+  .about h1 .script { display: block; font-size: 1.1em; }
+  .about p { color: #ddd0bb; font-size: 18px; margin: 16px 0 0; }
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; }
+  .fact { background: var(--bg-2); border-radius: 6px; padding: 18px; }
+  .fact h3 { font-size: 15px; color: var(--amber); letter-spacing: 1.5px; }
+  .fact p { margin: 6px 0 0; font-size: 16px; }
+  .fact a { color: var(--cream); }
 
-  [hidden] { display: none !important; }
-  a:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  /* ---------- footer ---------- */
+  footer { margin-top: 70px; background: #1b1511; border-top: 1px solid var(--rule); padding: 30px 0 110px; }
+  .foot { display: grid; grid-template-columns: repeat(5, auto); justify-content: space-between; gap: 20px; }
+  .foot h4 { font: 500 13px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin: 0 0 4px; }
+  .foot p { margin: 0; color: var(--grey); font-size: 15px; }
+  .foot a { color: var(--cream); text-decoration: none; }
+  .foot a:hover { color: var(--amber); }
 
-  /* whatsapp */
-  .wa {
-    position: fixed; right: 16px; bottom: 16px; z-index: 10;
-    display: flex; align-items: center; gap: 10px; text-decoration: none;
-    background: #25d366; color: #fff; border-radius: 40px;
-    padding: 8px 16px 8px 8px; box-shadow: 0 6px 20px rgba(0,0,0,.5);
-    font: 500 16px "Oswald", sans-serif; letter-spacing: .5px;
-  }
-  .wa svg { width: 40px; height: 40px; }
+  /* ---------- WhatsApp chat ---------- */
+  .wa-btn { position: fixed; right: 18px; bottom: 18px; z-index: 50; border: 0; cursor: pointer;
+    display: flex; align-items: center; gap: 10px; background: #25d366; color: #fff; border-radius: 40px;
+    padding: 7px 18px 7px 7px; box-shadow: 0 8px 24px rgba(0,0,0,.45); font: 500 16px "Oswald", sans-serif; letter-spacing: .5px; }
+  .wa-btn svg { width: 40px; height: 40px; flex: none; }
+  .wa-btn small { display: block; font: 400 12px "Roboto Condensed", sans-serif; opacity: .9; text-align: left; line-height: 1.1; }
+  .wa-btn span { text-align: left; line-height: 1.15; }
+  .chat { position: fixed; right: 18px; bottom: 84px; z-index: 50; width: min(340px, calc(100vw - 36px));
+    background: #efe7dc; color: #1e1a16; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.5);
+    transform-origin: bottom right; animation: pop .18s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: scale(.95) translateY(8px); } }
+  .chat-head { background: #075e54; color: #fff; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .chat-head img { width: 42px; height: 42px; border-radius: 50%; background: #111; object-fit: contain; padding: 3px; }
+  .chat-head b { font: 500 17px "Oswald", sans-serif; display: block; }
+  .chat-head small { opacity: .85; }
+  .chat-head button { margin-left: auto; background: none; border: 0; color: #fff; font-size: 24px; cursor: pointer; line-height: 1; }
+  .chat-body { padding: 16px 14px; min-height: 120px; }
+  .bubble { background: #fff; border-radius: 0 8px 8px 8px; padding: 9px 12px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .bubble + .bubble { margin-top: 6px; }
+  .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .quick button { background: #fff; border: 1px solid #c9d8cf; color: #075e54; border-radius: 20px; padding: 5px 12px; font: 500 14px "Roboto Condensed", sans-serif; cursor: pointer; }
+  .chat form { display: flex; gap: 8px; padding: 10px; background: #f6f1ea; border-top: 1px solid #ddd3c6; }
+  .chat textarea { flex: 1; resize: none; height: 42px; border: 0; border-radius: 20px; padding: 10px 14px; font: 15px "Roboto Condensed", sans-serif; }
+  .chat form button { width: 42px; height: 42px; border-radius: 50%; border: 0; background: #25d366; color: #fff; cursor: pointer; display: grid; place-items: center; flex: none; }
+  .chat form svg { width: 20px; height: 20px; fill: #fff; }
 
-  @media (max-width: 900px) {
-    .cols { grid-template-columns: 1fr 1fr; }
-    .cols > div:nth-child(3) { grid-column: 1 / -1; border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); margin-top: 24px; padding-top: 6px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0 34px; }
-    .cols > div:nth-child(3) > .gatsby { margin-top: 24px; }
-    .bar { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 860px) {
+    .side-grid { grid-template-columns: 1fr 1fr; }
+    .plain { grid-template-columns: 1fr 1fr; }
+    .tiers, .courses { grid-template-columns: 1fr; }
+    .places { grid-template-columns: 1fr 1fr; }
+    .place, .place.big { grid-column: span 1; aspect-ratio: 4/3; }
+    .about { grid-template-columns: 1fr; gap: 26px; }
+    .about img { aspect-ratio: 16/10; }
+    .facts { grid-template-columns: 1fr 1fr; }
+    .foot { grid-template-columns: 1fr 1fr; }
   }
-  @media (max-width: 620px) {
-    header img { width: 116px; }
-    nav { gap: 18px; }
-    nav a { font-size: 16px; letter-spacing: 1.5px; }
-    .strap { letter-spacing: 3px; font-size: 13px; }
-    .board { padding: 26px 18px 18px; outline-offset: -6px; }
-    .halal { width: 48px; height: 48px; top: 14px; right: 14px; font-size: 9px; }
-    .halal span { font-size: 15px; }
-    .cols, .cols > div:nth-child(3), .cat { grid-template-columns: 1fr; display: block; }
-    .cols > div + div, .cat > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); margin-top: 24px; padding-top: 18px; }
-    .it p { max-width: none; }
-    .cat-intro h1 { font-size: 32px; }
-    .bar { grid-template-columns: 1fr; padding: 16px 18px; }
-    .wa { font-size: 15px; padding: 6px 14px 6px 6px; }
-    .wa svg { width: 36px; height: 36px; }
+  @media (max-width: 560px) {
+    :root { --head: 58px; }
+    header.top img { width: 96px; }
+    nav.pages { gap: 16px; }
+    nav.pages a { font-size: 15px; letter-spacing: 1.2px; }
+    .dish { border-radius: 0; margin-bottom: 8px; }
+    .dish .info { flex-direction: column; align-items: flex-start; padding: 22px 18px; gap: 14px; }
+    .dish::after { background: linear-gradient(to top, rgba(28,22,17,.97) 0%, rgba(28,22,17,.8) 40%, rgba(28,22,17,0) 70%); }
+    .prices { justify-content: flex-start; }
+    .price { min-width: 72px; padding: 6px 10px; }
+    .price b { font-size: 20px; }
+    .places { grid-template-columns: 1fr; }
+    .plain { grid-template-columns: 1fr; }
+    .foot { grid-template-columns: 1fr; }
+    .sec-h { flex-direction: column; gap: 2px; }
+    .cats { justify-content: flex-start; }
   }
+  @media (prefers-reduced-motion: reduce) { .scroll-hint span, .chat { animation: none; } }
 </style>
 </head>
 <body>
 
-<header>
-  <a href="#menu" aria-label="EmJay's"><img src="logo.png" alt="EmJay's" width="150" height="54"></a>
-  <nav>
-    <a href="#menu" data-tab="menu" aria-current="page">Menu</a>
-    <a href="#catering" data-tab="catering">Catering</a>
-  </nav>
+<header class="top">
+  <div class="wrap">
+    <a href="#menu" aria-label="EmJay's home"><img src="logo.png" alt="EmJay's" width="120" height="43"></a>
+    <nav class="pages">
+      <a href="#menu" data-page="menu">Menu</a>
+      <a href="#catering" data-page="catering">Catering</a>
+      <a href="#about" data-page="about">About us</a>
+    </nav>
+  </div>
 </header>
 
-<div class="strap"><span>★</span> Better food better mood <span>★</span></div>
+<!-- ================= MENU ================= -->
+<main id="page-menu">
+  <section class="menu-intro">
+    <img src="logo.png" alt="EmJay's" width="300" height="108">
+    <div class="strap">Better food better mood</div>
+    <span class="halal">حلال · 100% HALAAL</span>
+    <p class="notice"><b>Pool &amp; Dominos tournaments, 17–26 Nov.</b> R50 entry, cash prize for 1st. Entries close Mon 16th.
+      <a href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20to%20enter%20the%20tournament" target="_blank" rel="noopener">Enter on WhatsApp</a></p>
+    <div class="scroll-hint">Scroll the menu<span>↓</span></div>
+  </section>
 
-<p class="notice"><b>Pool &amp; Dominos tournaments, 17–26 Nov.</b> R50 entry, cash prize for 1st. Entries close Mon 16th. <a href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20to%20enter%20the%20tournament" target="_blank" rel="noopener">Enter on WhatsApp</a></p>
+  <nav class="cats" id="cats" aria-label="Menu sections"></nav>
+  <div id="dishes"></div>
 
-<!-- MENU -->
-<main class="sheet" id="menu">
-  <div class="board">
-    <div class="halal" aria-label="Halaal"><div><span>حلال</span>HALAAL</div></div>
-    <div class="cols">
-      <div>
-        <h2>Half-smashed burgers</h2>
-        <div class="it"><div class="row"><h3>Chuck Norris</h3><div class="pr"><div><small>Single</small>R89</div><div><small>Double</small>R109</div><div><small>Triple</small>R129</div></div></div>
-          <p>Brioche bun, double ground beef chuck half smash, caramelised onions, EmJay's signature sauce, fries</p></div>
-        <div class="it"><div class="row"><h3>Chilli Cheese Chuck</h3><div class="pr"><div><small>Single</small>R109</div><div><small>Double</small>R129</div><div><small>Triple</small>R149</div></div></div>
-          <p>Brioche bun, double ground beef chuck half smash, triple cheesy spicy jalapeño sauce, EmJay's signature sauce, fries</p></div>
-
-        <h2>EmJay's favourites</h2>
-        <div class="it"><div class="row"><h3>Rib n Chuck</h3><div class="pr"><div><small>Single</small>R139</div><div><small>Double</small>R159</div></div></div>
-          <p>Brioche bun, succulent saucy shredded short rib, double ground beef chuck half smash, caramelised onion, fries</p></div>
-        <div class="it"><div class="row"><h3>Full House Masala Steak Sandwich</h3><div class="pr">R99</div></div>
-          <p>Tender slow-cooked masala steak layered with bold spice, topped with a cheese slice, tucked into fresh toast with signature sauce, fries</p></div>
-        <div class="it"><div class="row"><h3>Off Da Bone Short Rib</h3><div class="pr"><div><small>500g</small>R239</div><div><small>1kg</small>R329</div></div></div>
-          <p>Succulent, saucy beef short rib, onion rings, fries</p></div>
-      </div>
-
-      <div>
-        <h2>The long rolls</h2>
-        <div class="it"><div class="row"><h3>Thick Nippy Boerewors</h3><div class="pr"><div>R45</div><div><small>With fries</small>R55</div></div></div>
-          <p>Grilled thick nippy wors, smothered in caramelised onions on a soft glazed roll</p></div>
-        <div class="it"><div class="row"><h3>Hot Dogs</h3><div class="pr"><div><small>Single</small>R35</div><div><small>Double</small>R45</div></div></div>
-          <p>Supreme fried vienna, hot dog roll, fries</p></div>
-        <div class="it"><div class="row"><h3>Philly Cheese Steak</h3><div class="pr">R99</div></div>
-          <p>Spiced steak in a glazed roll topped with triple cheesy spicy jalapeño sauce, fries</p></div>
-
-        <h2>Southern fried</h2>
-        <div class="it"><div class="row"><h3>Crispy Chic Tenders</h3><div class="pr"><div><small>3 tenders</small>R60</div><div><small>6 tenders</small>R110</div></div></div>
-          <p>Buttermilk fried chicken tenders, fries and a sauce tub of your choice</p></div>
-
-        <p class="script">Meal of the day<span>…everyday!</span></p>
-      </div>
-
-      <div>
-        <div>
-          <h2>Parcels</h2>
-          <div class="it"><div class="row"><h3>Vienna &amp; Chip Parcel</h3><div class="pr"><div><small>4 vienna</small>R64</div><div><small>6 vienna</small>R94</div><div><small>8 vienna</small>R114</div></div></div>
-            <p>Fried supreme viennas in a bed of fries with sauce of your choice</p></div>
-          <div class="it"><div class="row"><h3>Smash Burger Slider Box</h3><div class="pr"><div><small>3 sliders</small>R99</div><div><small>6 sliders</small>R189</div></div></div>
-            <p>Junior half smashed burgers with fries x2</p></div>
-
-          <div class="gatsby">
-            <h2>Gatsby's</h2>
-            <table>
-              <tr><th></th><th>FULL</th><th>HALF</th></tr>
-              <tr><td>Vienna Gatsby</td><td>R139</td><td>R80</td></tr>
-              <tr><td>Nippy Wors Gatsby</td><td>R190</td><td>R105</td></tr>
-              <tr><td>Masala Steak Gatsby</td><td>R215</td><td>R130</td></tr>
-              <tr><td>Smash Burger Gatsby</td><td>R220</td><td>R135</td></tr>
-              <tr><td>Polony Gatsby</td><td>R99</td><td>R55</td></tr>
-            </table>
-            <div class="add"><span>Add Full House <small>(egg, cheese, onion rings)</small></span><span>R40</span></div>
-          </div>
-        </div>
-
-        <div>
-          <h2 style="margin-top:30px">Extras</h2>
-          <div class="it"><div class="row"><h3>Fries</h3><div class="pr"><div><small>Small</small>R19</div><div><small>Medium</small>R30</div><div><small>Large</small>R40</div></div></div></div>
-          <div class="it"><div class="row"><h3>Chilli Cheese Fries</h3><div class="pr"><div><small>Small</small>R40</div><div><small>Large</small>R60</div></div></div></div>
-          <div class="it"><div class="row"><h3>Smash Burger Loaded Fries</h3><div class="pr">R75</div></div></div>
-          <div class="it"><div class="row"><h3>Chip Roll</h3><div class="pr">R28</div></div></div>
-          <div class="it"><div class="row"><h3>Sauce Tubs</h3><div class="pr"><div><small>Honey Mustard</small>R20</div><div><small>House Sauce</small>R20</div><div><small>Chilli Cheese</small>R30</div></div></div></div>
-          <div class="it"><div class="row"><h3>Fried Egg</h3><div class="pr">R8</div></div></div>
-          <div class="it"><div class="row"><h3>Onion Rings</h3><div class="pr">R25</div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <section class="motd">
+    <div class="script">Meal of the day<span>…everyday!</span></div>
+    <p>Ask in store or WhatsApp us to find out what's on today. Delivery on Mr D &amp; Uber Eats.</p>
+  </section>
 </main>
 
-<!-- CATERING -->
-<main class="sheet" id="catering" hidden>
-  <div class="board">
-    <div class="halal" aria-label="Halaal"><div><span>حلال</span>HALAAL</div></div>
-    <div class="cat-intro">
-      <h1>All you ever wanted to eat. <em>We'll make it!</em></h1>
-      <p>Office lunches, birthdays, functions, the whole team or the whole family. Tell us how many people and what you're craving, and we'll sort it out.</p>
-    </div>
+<!-- ================= CATERING ================= -->
+<main id="page-catering" class="wrap" hidden>
+  <section class="hero-sm">
+    <h1>All you ever wanted to eat <span class="script">We'll make it!</span></h1>
+    <p>Office lunches, birthdays, launches and functions. We cook, we bring it, you enjoy it. Every order is halaal and made fresh.</p>
+  </section>
 
-    <div class="cat">
-      <div>
-        <h2>What we cater</h2>
-        <ul>
-          <li>Daily meals</li>
-          <li>Set menus</li>
-          <li>Your favourite savouries</li>
-          <li>All the snacks you'll ever need</li>
-          <li>Delivered right to your office</li>
-        </ul>
-      </div>
-      <div>
-        <h2>Good for a crowd</h2>
-        <div class="it"><div class="row"><h3>Smash Burger Slider Box</h3><div class="pr">6 for R189</div></div></div>
-        <div class="it"><div class="row"><h3>Vienna &amp; Chip Parcel</h3><div class="pr">8 for R114</div></div></div>
-        <div class="it"><div class="row"><h3>Crispy Chic Tenders</h3><div class="pr">6 for R110</div></div></div>
-        <div class="it"><div class="row"><h3>Full Gatsby</h3><div class="pr">from R99</div></div></div>
-        <div class="it"><div class="row"><h3>Off Da Bone Short Rib</h3><div class="pr">1kg R329</div></div></div>
-      </div>
-    </div>
+  <div class="sec-h"><h2>Where we've been</h2><p>A few of the places we've fed</p></div>
+  <!-- Replace these photos and captions with real EmJay's events -->
+  <div class="places">
+    <figure class="place big" style="margin:0"><img src="img/cat-launch.jpg" alt="Crowd at a launch day" loading="lazy"><div><h3>Canteen launch day</h3><p>The Queens, Wynberg</p></div></figure>
+    <figure class="place big" style="margin:0"><img src="img/cat-office.jpg" alt="Team lunch in an office" loading="lazy"><div><h3>Office lunches</h3><p>Delivered to your desk</p></div></figure>
+    <figure class="place" style="margin:0"><img src="img/cat-party.jpg" alt="Balloons at a birthday party" loading="lazy"><div><h3>Birthday parties</h3><p>Platters and slider boxes</p></div></figure>
+    <figure class="place" style="margin:0"><img src="img/cat-function.jpg" alt="Dressed tables at a function" loading="lazy"><div><h3>Functions</h3><p>Plated 3-course meals</p></div></figure>
+    <figure class="place" style="margin:0"><img src="img/cat-buffet.jpg" alt="Buffet spread" loading="lazy"><div><h3>Buffets</h3><p>Big crowds, big trays</p></div></figure>
+  </div>
 
-    <div class="ask">
-      <p>For a quote, send us the date, number of people and what you'd like.</p>
-      <a class="btn" href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20a%20catering%20quote.%0ADate%3A%20%0ANumber%20of%20people%3A%20%0AWhat%20we'd%20like%3A%20" target="_blank" rel="noopener">WhatsApp for a quote</a>
+  <div class="sec-h"><h2>What it costs</h2><p>Example prices per person</p></div>
+  <div class="tiers">
+    <div class="tier">
+      <h3>Office lunch</h3>
+      <div class="pp">R95<small>per person</small></div>
+      <ul>
+        <li><b>One main</b> <span>burger, long roll or tenders</span></li>
+        <li><b>Fries</b> <span>with every meal</span></li>
+        <li><b>Delivered</b> <span>to your office</span></li>
+      </ul>
+      <p class="ex">Example: 20 people ≈ R1,900</p>
+    </div>
+    <div class="tier">
+      <h3>Party platters</h3>
+      <div class="pp">R150<small>per person</small></div>
+      <ul>
+        <li><b>Slider boxes</b> <span>junior smash burgers</span></li>
+        <li><b>Crispy tenders</b> <span>with sauce tubs</span></li>
+        <li><b>Vienna &amp; chip parcels</b> <span>and gatsbys to share</span></li>
+      </ul>
+      <p class="ex">Example: 30 people ≈ R4,500</p>
+    </div>
+    <div class="tier feat">
+      <h3>3-course meal</h3>
+      <div class="pp">R350<small>per person</small></div>
+      <ul>
+        <li><b>Starter</b> <span>fresh salad or savouries</span></li>
+        <li><b>Main</b> <span>masala steak, short rib or chicken</span></li>
+        <li><b>Dessert</b> <span>doughnuts and sweet treats</span></li>
+      </ul>
+      <p class="ex">Example: 50 people ≈ R17,500</p>
+    </div>
+  </div>
+
+  <div class="courses">
+    <div class="course"><img src="img/course-starter.jpg" alt="Fresh salad bowl" loading="lazy"><div><small>Course 1</small><h3>Starter</h3><p>Fresh salads, samoosas and savouries to get things going.</p></div></div>
+    <div class="course"><img src="img/course-main.jpg" alt="Plated main course" loading="lazy"><div><small>Course 2</small><h3>Main</h3><p>Slow-cooked masala steak, saucy short rib or crispy chicken with sides.</p></div></div>
+    <div class="course"><img src="img/course-dessert.jpg" alt="Stack of glazed doughnuts" loading="lazy"><div><small>Course 3</small><h3>Dessert</h3><p>Doughnuts, cupcakes and something sweet to finish.</p></div></div>
+  </div>
+  <p class="fine">Prices are a guide. Your final quote depends on the menu, number of guests and delivery.</p>
+
+  <div class="cta">
+    <div><h2>Get a quote</h2><p>Send us the date, number of people and what you'd like.</p></div>
+    <div class="btns">
+      <a class="btn" href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20a%20catering%20quote.%0ADate%3A%20%0ANumber%20of%20people%3A%20%0APackage%3A%20" target="_blank" rel="noopener">WhatsApp us</a>
       <a class="btn alt" href="tel:+27637920608">Call 063 792 0608</a>
     </div>
   </div>
 </main>
 
+<!-- ================= ABOUT ================= -->
+<main id="page-about" class="wrap" hidden>
+  <section class="about">
+    <div>
+      <h1>Your new canteen <span class="script">right here.</span></h1>
+      <p>EmJay's started with a simple idea: you shouldn't have to walk down the road for slap chips, order takeaways and promise yourself it's the last time, or settle for a sad desk lunch.</p>
+      <p>So we opened a proper canteen at The Queens in Wynberg. Half-smashed burgers, thick nippy wors, masala steak, gatsbys built to share and a different meal of the day, every day. All halaal, all made fresh.</p>
+      <p>Come sit with us, order to your office, or join one of our pool and dominos tournaments. Better food, better mood.</p>
+    </div>
+    <img src="img/about.jpg" alt="Burger and fries" loading="lazy">
+  </section>
+  <div class="facts">
+    <div class="fact"><h3>Find us</h3><p><a href="https://www.google.com/maps/search/?api=1&query=11+Byrnes+Avenue+Wynberg+Cape+Town" target="_blank" rel="noopener">The Queens, 11 Byrnes Avenue, Wynberg</a></p></div>
+    <div class="fact"><h3>100% Halaal</h3><p>Everything on our menu.</p></div>
+    <div class="fact"><h3>Delivery</h3><p>To your office, or via Mr D &amp; Uber Eats.</p></div>
+    <div class="fact"><h3>Games</h3><p>Pool &amp; dominos tournaments with prizes.</p></div>
+  </div>
+</main>
+
 <footer>
-  <div class="bar">
-    <div><a href="tel:+27637920608">063 792 0608</a><small>Call or WhatsApp</small></div>
-    <div><a href="https://www.google.com/maps/search/?api=1&query=11+Byrnes+Avenue+Wynberg+Cape+Town" target="_blank" rel="noopener">The Queens</a><small>11 Byrnes Avenue, Wynberg</small></div>
-    <div><a href="https://www.instagram.com/emjays_wynberg" target="_blank" rel="noopener">@emjays_wynberg</a><small><a href="https://www.tiktok.com/@emjayseats" target="_blank" rel="noopener">TikTok @emjayseats</a></small></div>
-    <div>Mr D &amp; Uber Eats<small>Delivery available</small></div>
-    <!-- EMAIL: add here later, e.g. <div><a href="mailto:you@example.com">you@example.com</a><small>Email</small></div> -->
+  <div class="wrap foot">
+    <div><h4>Call / WhatsApp</h4><p><a href="tel:+27637920608">063 792 0608</a></p></div>
+    <div><h4>Email</h4><p><!-- EMAIL: add later --></p></div>
+    <div><h4>Find us</h4><p>The Queens, 11 Byrnes Ave, Wynberg</p></div>
+    <div><h4>Follow</h4><p><a href="https://www.instagram.com/emjays_wynberg" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.tiktok.com/@emjayseats" target="_blank" rel="noopener">TikTok</a></p></div>
+    <div><h4>Delivery</h4><p>Mr D &amp; Uber Eats</p></div>
   </div>
 </footer>
 
-<a class="wa" href="https://wa.me/27637920608" target="_blank" rel="noopener" aria-label="WhatsApp EmJay's on 063 792 0608">
+<!-- ================= WhatsApp chat ================= -->
+<div class="chat" id="chat" hidden role="dialog" aria-label="Chat with EmJay's on WhatsApp">
+  <div class="chat-head">
+    <img src="logo.png" alt="">
+    <div><b>EmJay's</b><small>063 792 0608</small></div>
+    <button type="button" id="chat-close" aria-label="Close chat">×</button>
+  </div>
+  <div class="chat-body">
+    <div class="bubble">Hi there 👋</div>
+    <div class="bubble">What can we get you today? Send us a message and we'll reply on WhatsApp.</div>
+    <div class="quick">
+      <button type="button">I'd like to place an order</button>
+      <button type="button">Catering quote</button>
+      <button type="button">What's the meal of the day?</button>
+    </div>
+  </div>
+  <form id="chat-form">
+    <textarea id="chat-msg" placeholder="Type a message" aria-label="Message"></textarea>
+    <button type="submit" aria-label="Send on WhatsApp"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+  </form>
+</div>
+
+<button class="wa-btn" id="wa-btn" type="button" aria-expanded="false" aria-controls="chat">
   <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#fff"/><path fill="#25d366" d="M16 6.2a9.7 9.7 0 0 0-8.3 14.7L6.4 25.6l4.8-1.3A9.7 9.7 0 1 0 16 6.2zm5.7 13.8c-.2.7-1.4 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.6-.6-2.8-1.2-4.7-4.1-4.8-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 2 1.1 1 2 1.3 2.3 1.4.3.1.4.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>
-  <span>063 792 0608</span>
-</a>
+  <span><small>Chat with us</small>063 792 0608</span>
+</button>
 
 <script>
-  const links = document.querySelectorAll("nav a");
-  function show() {
-    const tab = location.hash === "#catering" ? "catering" : "menu";
-    document.getElementById("menu").hidden = tab !== "menu";
-    document.getElementById("catering").hidden = tab !== "catering";
-    links.forEach(a => a.toggleAttribute("aria-current", a.dataset.tab === tab));
-    links.forEach(a => a.dataset.tab === tab && a.setAttribute("aria-current", "page"));
+/* ---------- MENU DATA (edit names, prices and photos here) ---------- */
+const MENU = [
+  { id: "burgers", title: "Half-smashed burgers", dishes: [
+    { name: "Chuck Norris", img: "chuck-norris", desc: "Brioche bun, double ground beef chuck half smash, caramelised onions, EmJay's signature sauce, fries.", prices: [["Single", 89], ["Double", 109], ["Triple", 129]] },
+    { name: "Chilli Cheese Chuck", img: "chilli-cheese-chuck", desc: "Brioche bun, double ground beef chuck half smash, triple cheesy spicy jalapeño sauce, EmJay's signature sauce, fries.", prices: [["Single", 109], ["Double", 129], ["Triple", 149]] },
+  ]},
+  { id: "favourites", title: "EmJay's favourites", dishes: [
+    { name: "Rib n Chuck", img: "rib-n-chuck", desc: "Brioche bun, succulent saucy shredded short rib, double ground beef chuck half smash, caramelised onion, fries.", prices: [["Single", 139], ["Double", 159]] },
+    { name: "Full House Masala Steak Sandwich", img: "masala-steak", desc: "Slow-cooked masala steak layered with bold spice, a cheese slice, tucked into fresh toast with signature sauce, fries.", prices: [["", 99]] },
+    { name: "Off Da Bone Short Rib", img: "short-rib", desc: "Succulent, saucy beef short rib, onion rings, fries.", prices: [["500g", 239], ["1kg", 329]] },
+  ]},
+  { id: "rolls", title: "The long rolls", dishes: [
+    { name: "Thick Nippy Boerewors", img: "boerewors", desc: "Grilled thick nippy wors, smothered in caramelised onions on a soft glazed roll.", prices: [["Roll", 45], ["With fries", 55]] },
+    { name: "Hot Dogs", img: "hot-dogs", desc: "Supreme fried vienna, hot dog roll, fries.", prices: [["Single", 35], ["Double", 45]] },
+    { name: "Philly Cheese Steak", img: "philly", desc: "Spiced steak in a glazed roll topped with triple cheesy spicy jalapeño sauce, fries.", prices: [["", 99]] },
+  ]},
+  { id: "fried", title: "Southern fried", dishes: [
+    { name: "Crispy Chic Tenders", img: "tenders", desc: "Buttermilk fried chicken tenders, fries and a sauce tub of your choice.", prices: [["3 tenders", 60], ["6 tenders", 110]] },
+  ]},
+  { id: "gatsbys", title: "Gatsby's", note: "Full or half. Add Full House (egg, cheese, onion rings) for R40.", dishes: [
+    { name: "Gatsby's", img: "gatsby", desc: "Vienna R139 / R80 · Nippy Wors R190 / R105 · Masala Steak R215 / R130 · Smash Burger R220 / R135 · Polony R99 / R55", prices: [["Half from", 55], ["Full from", 99]] },
+  ]},
+  { id: "parcels", title: "Parcels", dishes: [
+    { name: "Vienna & Chip Parcel", img: "parcel", desc: "Fried supreme viennas in a bed of fries with sauce of your choice.", prices: [["4 vienna", 64], ["6 vienna", 94], ["8 vienna", 114]] },
+    { name: "Smash Burger Slider Box", img: "sliders", desc: "Junior half smashed burgers with fries x2.", prices: [["3 sliders", 99], ["6 sliders", 189]] },
+  ]},
+];
+const EXTRAS = [
+  ["Fries", "fries", "R19 · R30 · R40"],
+  ["Chilli Cheese Fries", "chilli-fries", "R40 · R60"],
+  ["Smash Burger Loaded Fries", "loaded-fries", "R75"],
+  ["Onion Rings", "onion-rings", "R25"],
+];
+const PLAIN = [["Chip Roll", "R28"], ["Fried Egg", "R8"], ["Sauce Tubs", "Honey Mustard R20 · House R20 · Chilli Cheese R30"]];
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+let n = 0, html = "";
+for (const c of MENU) {
+  html += `<div class="cat-title" id="${c.id}"><h2>${esc(c.title)}</h2>${c.note ? `<p>${esc(c.note)}</p>` : ""}</div>`;
+  for (const d of c.dishes) {
+    n++;
+    html += `<article class="dish" data-cat="${c.id}">
+      <img src="img/${d.img}.jpg" alt="${esc(d.name)}" loading="${n < 3 ? "eager" : "lazy"}">
+      <div class="info">
+        <div><div class="num">${String(n).padStart(2, "0")} · ${esc(c.title)}</div><h3>${esc(d.name)}</h3><p>${esc(d.desc)}</p></div>
+        <div class="prices">${d.prices.map(([l, p]) => `<div class="price">${l ? `<small>${esc(l)}</small>` : ""}<b>R${p}</b></div>`).join("")}</div>
+      </div></article>`;
   }
-  addEventListener("hashchange", () => { show(); scrollTo(0, 0); });
-  show();
+  if (c.id === "gatsbys") html += `<div class="full-house"><span>Add Full House · egg, cheese, onion rings</span><span>R40</span></div>`;
+}
+html += `<div class="cat-title" id="extras"><h2>Extras</h2></div><div class="wrap">
+  <div class="side-grid">${EXTRAS.map(([t, i, p]) => `<div class="side" data-cat="extras"><img src="img/${i}.jpg" alt="${esc(t)}" loading="lazy"><div><h3>${esc(t)}</h3><p>${esc(p)}</p></div></div>`).join("")}</div>
+  <div class="plain">${PLAIN.map(([t, p]) => `<div data-cat="extras"><h3>${esc(t)}</h3><span>${esc(p)}</span></div>`).join("")}</div></div>`;
+document.getElementById("dishes").innerHTML = html;
+
+const cats = [...MENU.map(c => [c.id, c.title]), ["extras", "Extras"]];
+const catNav = document.getElementById("cats");
+catNav.innerHTML = cats.map(([id, t]) => `<a href="#${id}" data-cat="${id}">${esc(t)}</a>`).join("");
+
+/* highlight current category while scrolling */
+const io = new IntersectionObserver(es => {
+  for (const e of es) if (e.isIntersecting) {
+    const id = e.target.dataset.cat || e.target.id;
+    catNav.querySelectorAll("a").forEach(a => {
+      const on = a.dataset.cat === id;
+      a.classList.toggle("on", on);
+      if (on) a.scrollIntoView({ block: "nearest", inline: "center" });
+    });
+  }
+}, { rootMargin: "-45% 0px -50% 0px" });
+document.querySelectorAll(".dish, .cat-title, .side").forEach(el => io.observe(el));
+
+/* ---------- pages ---------- */
+const pages = ["menu", "catering", "about"];
+const catIds = new Set(cats.map(c => c[0]));
+function route() {
+  const h = location.hash.slice(1);
+  const page = pages.includes(h) ? h : "menu";
+  for (const p of pages) document.getElementById("page-" + p).hidden = p !== page;
+  document.querySelectorAll("nav.pages a").forEach(a => a.toggleAttribute("aria-current", a.dataset.page === page));
+  document.documentElement.classList.toggle("snap", page === "menu");
+  if (catIds.has(h)) document.getElementById(h).scrollIntoView();
+  else window.scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+route();
+
+/* ---------- WhatsApp chat ---------- */
+const chat = document.getElementById("chat"), waBtn = document.getElementById("wa-btn"), msg = document.getElementById("chat-msg");
+const toggle = open => { chat.hidden = !open; waBtn.setAttribute("aria-expanded", open); if (open) msg.focus(); };
+waBtn.onclick = () => toggle(chat.hidden);
+document.getElementById("chat-close").onclick = () => toggle(false);
+document.querySelectorAll(".quick button").forEach(b => b.onclick = () => { msg.value = b.textContent; msg.focus(); });
+const send = () => {
+  const text = msg.value.trim() || "Hi EmJay's!";
+  window.open("https://wa.me/27637920608?text=" + encodeURIComponent(text), "_blank", "noopener");
+};
+document.getElementById("chat-form").onsubmit = e => { e.preventDefault(); send(); };
+msg.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+addEventListener("keydown", e => { if (e.key === "Escape" && !chat.hidden) toggle(false); });
 </script>
 </body>
 </html>
