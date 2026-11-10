@@ -21,15 +21,18 @@
     --rule: rgba(255,240,220,.12);
 
     /* liquid glass */
-    --glass: rgba(255, 244, 228, .09);
-    --glass-strong: rgba(255, 244, 228, .16);
-    --glass-edge: rgba(255, 248, 236, .28);
-    --glass-blur: blur(22px) saturate(185%) brightness(1.06);
+    /* clear glass, like iOS 26 tab bars: you can still see what's behind it */
+    --glass: rgba(24, 19, 15, .14);
+    --glass-edge: rgba(255, 250, 240, .24);
+    --glass-blur: blur(5px) saturate(190%) brightness(1.1);
+    /* slightly thicker glass for cards that carry reading text */
+    --glass-thick: rgba(24, 19, 15, .34);
+    --glass-thick-blur: blur(12px) saturate(180%) brightness(1.05);
     --glass-shadow:
-      inset 0 1px 0 rgba(255,255,255,.38),
-      inset 0 -1px 0 rgba(255,255,255,.07),
-      inset 0 0 18px rgba(255,255,255,.05),
-      0 10px 34px rgba(0,0,0,.34);
+      inset 1.5px 1.5px 0 -0.5px rgba(255,255,255,.45),
+      inset -1px -1px 0 -0.5px rgba(255,255,255,.18),
+      inset 0 0 10px rgba(255,255,255,.04),
+      0 8px 26px rgba(0,0,0,.28);
 
     --spring: cubic-bezier(.34, 1.45, .64, 1);
     --ease: cubic-bezier(.22, 1, .36, 1);
@@ -70,9 +73,12 @@
   .glass::before {
     content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
     background:
-      linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.04) 38%, rgba(255,255,255,0) 60%),
-      radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,.14), transparent 50%);
+      linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 35%),
+      radial-gradient(90% 60% at 0% 0%, rgba(255,255,255,.08), transparent 55%);
   }
+  .glass.thick { background: var(--glass-thick); -webkit-backdrop-filter: var(--glass-thick-blur); backdrop-filter: var(--glass-thick-blur); }
+  /* labels on clear glass need a little lift to stay readable over photos */
+  .glass :is(a, span, b, small, h3, p) { text-shadow: 0 1px 8px rgba(0,0,0,.35); }
 
   /* ---------- floating header ---------- */
   header.top {
@@ -84,7 +90,8 @@
     transition: background .4s var(--ease), box-shadow .4s var(--ease);
   }
   header.top img { width: 104px; }
-  .seg { position: relative; display: flex; padding: 4px; border-radius: 999px; background: rgba(0,0,0,.18); }
+  .seg { position: relative; display: flex; padding: 4px; border-radius: 999px; }
+  .seg a[aria-current], .cats a.on { color: var(--amber-2) !important; }
   .seg a {
     position: relative; z-index: 1; text-decoration: none; padding: 9px 18px 8px; border-radius: 999px;
     font: 500 15px "Oswald", sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey);
@@ -94,13 +101,29 @@
   /* the sliding glass lens */
   .lens {
     position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.10));
-    border: 1px solid rgba(255,255,255,.35);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 4px 14px rgba(0,0,0,.25);
+    background: rgba(12, 9, 7, .55);
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: inset 1px 1px 0 -0.5px rgba(255,255,255,.3), 0 2px 10px rgba(0,0,0,.25);
     transition: transform .55s var(--spring), width .55s var(--spring);
   }
   .lens.squish { animation: squish .45s var(--ease); }
   @keyframes squish { 40% { scale: 1.08 .86; } }
+
+
+  /* small tournament pill */
+  .pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; border-radius: 999px; padding: 6px 8px 6px 14px;
+    text-decoration: none; font-size: 13.5px; color: var(--grey); transition: transform .4s var(--spring); }
+  .pill b { color: var(--cream); font-weight: 500; }
+  .pill span { color: #2a1d0f; background: var(--amber); border-radius: 999px; padding: 2px 10px; font: 500 12px "Oswald", sans-serif; letter-spacing: .5px; text-shadow: none; }
+  .pill:hover { transform: translateY(-1px); }
+
+  /* phone tab bar, like the Apple Music bar */
+  .tabbar { display: none; }
+  .tabbar a { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px 6px;
+    text-decoration: none; color: var(--cream); font: 500 11px "Roboto Condensed", sans-serif; letter-spacing: .3px; border-radius: 999px; transition: color .3s var(--ease); }
+  .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 4px rgba(0,0,0,.4)); }
+  .tabbar a[aria-current] { color: var(--amber-2); }
+  .tabbar .lens { top: 5px; bottom: 5px; }
 
   /* ---------- menu ---------- */
   .intro {
@@ -124,7 +147,7 @@
   @keyframes bob { 50% { transform: translateY(7px); } }
 
   .cats-wrap { position: sticky; top: calc(max(12px, env(safe-area-inset-top)) + 70px); z-index: 30; height: 0; display: flex; justify-content: center; align-items: flex-start; pointer-events: none; }
-  .cats { background: rgba(30,22,16,.5); pointer-events: auto; max-width: calc(100% - 24px); overflow-x: auto; scrollbar-width: none; border-radius: 999px; padding: 4px; position: relative; display: flex; }
+  .cats { pointer-events: auto; max-width: calc(100% - 24px); overflow-x: auto; scrollbar-width: none; border-radius: 999px; padding: 4px; position: relative; display: flex; }
   .cats::-webkit-scrollbar { display: none; }
   .cats a { position: relative; z-index: 1; flex: none; text-decoration: none; padding: 7px 14px 6px; border-radius: 999px;
     font: 500 13px "Oswald", sans-serif; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); transition: color .3s var(--ease); }
@@ -136,8 +159,10 @@
   .cat-title p { color: var(--grey); margin: 12px 0 0; }
 
   .dish { position: relative; height: 100svh; min-height: 560px; overflow: hidden; scroll-snap-align: start; background: #18130f; }
-  .dish .ph { position: absolute; inset: 0; overflow: hidden; }
-  .dish .ph img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); will-change: transform; }
+  .dish .ph { position: absolute; inset: 0; overflow: hidden; background: #2a2018 center / cover no-repeat; }
+  .dish .ph::before { content: ""; position: absolute; inset: -40px; background: inherit; filter: blur(24px); transform: scale(1.1); }
+  .dish .ph img { position: relative; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); will-change: transform; opacity: 0; transition: opacity .7s var(--ease); }
+  .dish .ph img.loaded { opacity: 1; }
   .dish::after { content: ""; position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(to top, rgba(20,15,11,.75) 0%, rgba(20,15,11,.15) 40%, rgba(20,15,11,0) 70%, rgba(20,15,11,.35) 100%); }
   .dish .card {
@@ -263,6 +288,8 @@
   .wa-btn svg { width: 40px; height: 40px; flex: none; }
   .wa-btn span { text-align: left; line-height: 1.15; }
   .wa-btn small { display: block; font: 400 12px "Roboto Condensed", sans-serif; opacity: .92; }
+  .wa-btn .go { display: none; width: 40px; height: 40px; border-radius: 50%; place-items: center; background: linear-gradient(180deg,#3ce27c,#1cba58); box-shadow: inset 0 1px 0 rgba(255,255,255,.5); }
+  .wa-btn .go svg { width: 18px; height: 18px; fill: #fff; }
   .wa-btn:hover { transform: translateY(-2px) scale(1.02); }
 
   .chat { position: fixed; right: 16px; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 66px); z-index: 50;
@@ -296,7 +323,7 @@
   .chat form svg { width: 20px; height: 20px; fill: #fff; }
 
   /* springy press on everything tappable */
-  .btn:active, .wa-btn:active, .quick button:active, .chat form button:active, .seg a:active, .cats a:active { transform: scale(.94); transition-duration: .12s; }
+  .btn:active, .wa-btn:active, .quick button:active, .chat form button:active, .seg a:active, .cats a:active, .tabbar a:active { transform: scale(.94); transition-duration: .12s; }
 
   /* ---------- reveal on scroll ---------- */
   .rv { opacity: 0; transform: translateY(28px) scale(.985); filter: blur(6px);
@@ -338,6 +365,24 @@
     .foot { grid-template-columns: 1fr; }
     .sec-h { flex-direction: column; gap: 2px; }
     .page { padding-top: 76px; }
+    /* bottom tab bar replaces the top links on phones */
+    header.top { left: 12px; transform: none; width: auto; padding: 0 16px; height: 46px; }
+    header.top img { width: 74px; }
+    .seg { display: none; }
+    .cats-wrap { top: calc(max(12px, env(safe-area-inset-top)) + 54px); }
+    .tabbar { display: flex; position: fixed; z-index: 45; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom));
+      height: 62px; padding: 5px; border-radius: 999px; }
+    /* WhatsApp sits above the tab bar like the mini player */
+    .wa-btn { left: 12px; right: 12px; bottom: calc(max(12px, env(safe-area-inset-bottom)) + 70px); padding: 6px 8px 6px 6px; gap: 10px;
+      background: var(--glass); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); }
+    .wa-btn svg { width: 38px; height: 38px; }
+    .wa-btn span { flex: 1; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+    .wa-btn .go { display: grid; }
+    .chat { right: 12px; left: 12px; width: auto; bottom: calc(max(12px, env(safe-area-inset-bottom)) + 132px); transform-origin: 50% 110%; }
+    .dish .card { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 140px); }
+    footer { padding-bottom: 170px; }
+    .pill { font-size: 12.5px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition-duration: .01s !important; transition-delay: 0s !important; }
@@ -363,13 +408,12 @@
 <!-- ================= MENU ================= -->
 <main id="page-menu">
   <section class="intro">
-    <div class="bgimg" aria-hidden="true"><img src="img/chilli-cheese-chuck.jpg" alt=""></div>
+    <div class="bgimg" aria-hidden="true"><img src="img/chilli-cheese-chuck.webp" alt=""></div>
     <div class="intro-card glass rv">
       <img src="logo.png" alt="EmJay's" width="280" height="101">
       <div class="strap">Better food better mood</div>
       <span class="chip glass">100% HALAAL · <bdi lang="ar">حلال</bdi></span>
-      <p class="notice"><b>Pool &amp; Dominos tournaments, 17–26 Nov.</b> R50 entry, cash prize for 1st. Entries close Mon 16th.
-        <a href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20to%20enter%20the%20tournament" target="_blank" rel="noopener">Enter on WhatsApp</a></p>
+      <a class="pill glass" href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20to%20enter%20the%20tournament" target="_blank" rel="noopener"><b>🎱 Pool &amp; Dominos</b> 17–26 Nov · R50 <span>Enter →</span></a>
       <div class="scroll-hint">Scroll the menu<span>↓</span></div>
     </div>
   </section>
@@ -393,16 +437,16 @@
   <div class="sec-h rv"><h2>Where we've been</h2><p>A few of the places we've fed</p></div>
   <!-- Replace these photos and captions with real EmJay's events -->
   <div class="places">
-    <figure class="place big rv"><img src="img/cat-launch.jpg" alt="Crowd at a launch day" loading="lazy"><figcaption class="glass"><h3>Canteen launch day</h3><p>The Queens, Wynberg</p></figcaption></figure>
-    <figure class="place big rv" style="--d:.08s"><img src="img/cat-office.jpg" alt="Team lunch in an office" loading="lazy"><figcaption class="glass"><h3>Office lunches</h3><p>Delivered to your desk</p></figcaption></figure>
-    <figure class="place rv"><img src="img/cat-party.jpg" alt="Balloons at a birthday party" loading="lazy"><figcaption class="glass"><h3>Birthday parties</h3><p>Platters and slider boxes</p></figcaption></figure>
-    <figure class="place rv" style="--d:.08s"><img src="img/cat-function.jpg" alt="Dressed tables at a function" loading="lazy"><figcaption class="glass"><h3>Functions</h3><p>Plated 3-course meals</p></figcaption></figure>
-    <figure class="place rv" style="--d:.16s"><img src="img/cat-buffet.jpg" alt="Buffet spread" loading="lazy"><figcaption class="glass"><h3>Buffets</h3><p>Big crowds, big trays</p></figcaption></figure>
+    <figure class="place big rv"><img src="img/cat-launch.webp" alt="Crowd at a launch day" loading="lazy"><figcaption class="glass"><h3>Canteen launch day</h3><p>The Queens, Wynberg</p></figcaption></figure>
+    <figure class="place big rv" style="--d:.08s"><img src="img/cat-office.webp" alt="Team lunch in an office" loading="lazy"><figcaption class="glass"><h3>Office lunches</h3><p>Delivered to your desk</p></figcaption></figure>
+    <figure class="place rv"><img src="img/cat-party.webp" alt="Balloons at a birthday party" loading="lazy"><figcaption class="glass"><h3>Birthday parties</h3><p>Platters and slider boxes</p></figcaption></figure>
+    <figure class="place rv" style="--d:.08s"><img src="img/cat-function.webp" alt="Dressed tables at a function" loading="lazy"><figcaption class="glass"><h3>Functions</h3><p>Plated 3-course meals</p></figcaption></figure>
+    <figure class="place rv" style="--d:.16s"><img src="img/cat-buffet.webp" alt="Buffet spread" loading="lazy"><figcaption class="glass"><h3>Buffets</h3><p>Big crowds, big trays</p></figcaption></figure>
   </div>
 
   <div class="sec-h rv"><h2>What it costs</h2><p>Example prices per person</p></div>
   <div class="tiers">
-    <div class="tier glass rv">
+    <div class="tier glass thick rv">
       <h3>Office lunch</h3>
       <div class="pp">R95<small>per person</small></div>
       <ul>
@@ -412,7 +456,7 @@
       </ul>
       <p class="ex">Example: 20 people ≈ R1,900</p>
     </div>
-    <div class="tier glass rv" style="--d:.08s">
+    <div class="tier glass thick rv" style="--d:.08s">
       <h3>Party platters</h3>
       <div class="pp">R150<small>per person</small></div>
       <ul>
@@ -422,7 +466,7 @@
       </ul>
       <p class="ex">Example: 30 people ≈ R4,500</p>
     </div>
-    <div class="tier glass feat rv" style="--d:.16s">
+    <div class="tier glass thick feat rv" style="--d:.16s">
       <span class="badge">MOST BOOKED FOR EVENTS</span>
       <h3>3-course meal</h3>
       <div class="pp">R350<small>per person</small></div>
@@ -436,9 +480,9 @@
   </div>
 
   <div class="courses">
-    <div class="course glass rv"><div class="im"><img src="img/course-starter.jpg" alt="Fresh salad bowl" loading="lazy"></div><div class="t"><small>Course 1</small><h3>Starter</h3><p>Fresh salads, samoosas and savouries to get things going.</p></div></div>
-    <div class="course glass rv" style="--d:.08s"><div class="im"><img src="img/course-main.jpg" alt="Plated main course" loading="lazy"></div><div class="t"><small>Course 2</small><h3>Main</h3><p>Slow-cooked masala steak, saucy short rib or crispy chicken with sides.</p></div></div>
-    <div class="course glass rv" style="--d:.16s"><div class="im"><img src="img/course-dessert.jpg" alt="Stack of glazed doughnuts" loading="lazy"></div><div class="t"><small>Course 3</small><h3>Dessert</h3><p>Doughnuts, cupcakes and something sweet to finish.</p></div></div>
+    <div class="course glass rv"><div class="im"><img src="img/course-starter.webp" alt="Fresh salad bowl" loading="lazy"></div><div class="t"><small>Course 1</small><h3>Starter</h3><p>Fresh salads, samoosas and savouries to get things going.</p></div></div>
+    <div class="course glass rv" style="--d:.08s"><div class="im"><img src="img/course-main.webp" alt="Plated main course" loading="lazy"></div><div class="t"><small>Course 2</small><h3>Main</h3><p>Slow-cooked masala steak, saucy short rib or crispy chicken with sides.</p></div></div>
+    <div class="course glass rv" style="--d:.16s"><div class="im"><img src="img/course-dessert.webp" alt="Stack of glazed doughnuts" loading="lazy"></div><div class="t"><small>Course 3</small><h3>Dessert</h3><p>Doughnuts, cupcakes and something sweet to finish.</p></div></div>
   </div>
   <p class="fine">Prices are a guide. Your final quote depends on the menu, number of guests and delivery.</p>
 
@@ -461,7 +505,7 @@
       <p>So we opened a proper canteen at The Queens in Wynberg. Half-smashed burgers, thick nippy wors, masala steak, gatsbys built to share and a different meal of the day, every day. All halaal, all made fresh.</p>
       <p>Come sit with us, order to your office, or join one of our pool and dominos tournaments. Better food, better mood.</p>
     </div>
-    <div class="im glass rv" style="--d:.1s"><img src="img/about.jpg" alt="Burger and fries" loading="lazy"></div>
+    <div class="im glass rv" style="--d:.1s"><img src="img/about.webp" alt="Burger and fries" loading="lazy"></div>
   </section>
   <div class="facts">
     <div class="fact glass rv"><h3>Find us</h3><p><a href="https://www.google.com/maps/search/?api=1&query=11+Byrnes+Avenue+Wynberg+Cape+Town" target="_blank" rel="noopener">The Queens, 11 Byrnes Avenue, Wynberg</a></p></div>
@@ -481,8 +525,16 @@
   </div>
 </footer>
 
+
+<nav class="tabbar glass" id="tabbar" aria-label="Pages">
+  <span class="lens" aria-hidden="true"></span>
+  <a href="#menu" data-page="menu"><svg viewBox="0 0 24 24"><path d="M4 11h16M5 11a7 5 0 0 1 14 0M4 15h16M5 15v1.5A2.5 2.5 0 0 0 7.5 19h9a2.5 2.5 0 0 0 2.5-2.5V15"/></svg>Menu</a>
+  <a href="#catering" data-page="catering"><svg viewBox="0 0 24 24"><path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 8V6M10 6h4M3 20h18"/></svg>Catering</a>
+  <a href="#about" data-page="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>About</a>
+</nav>
+
 <!-- ================= WhatsApp chat ================= -->
-<div class="chat glass" id="chat" role="dialog" aria-label="Chat with EmJay's on WhatsApp" aria-hidden="true">
+<div class="chat glass thick" id="chat" role="dialog" aria-label="Chat with EmJay's on WhatsApp" aria-hidden="true">
   <div class="chat-head">
     <div class="av"><img src="logo.png" alt=""></div>
     <div><b>EmJay's</b><small>WhatsApp · 063 792 0608</small></div>
@@ -505,7 +557,8 @@
 
 <button class="wa-btn" id="wa-btn" type="button" aria-expanded="false" aria-controls="chat">
   <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#fff"/><path fill="#25d366" d="M16 6.2a9.7 9.7 0 0 0-8.3 14.7L6.4 25.6l4.8-1.3A9.7 9.7 0 1 0 16 6.2zm5.7 13.8c-.2.7-1.4 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.6-.6-2.8-1.2-4.7-4.1-4.8-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 2 1.1 1 2 1.3 2.3 1.4.3.1.4.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>
-  <span><small>Chat with us</small>063 792 0608</span>
+  <span><small>Chat with us on WhatsApp</small>063 792 0608</span>
+  <i class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></i>
 </button>
 
 <script>
@@ -544,6 +597,7 @@ const EXTRAS = [
 ];
 const PLAIN = [["Chip Roll", "R28"], ["Fried Egg", "R8"], ["Sauce Tubs", "Honey Mustard R20 · House R20 · Chilli Cheese R30"]];
 
+const LQIP = {"about":"data:image/webp;base64,UklGRsQAAABXRUJQVlA4ILgAAAAQBQCdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoJYBhf4tllwhvMajJkdWvZUnCXgAP7p95JlzApf75hA2/8ol0pMIe6I/uE7+gcBYNTHC/7fF60EpvZ8FVLJ6mbODzK2wjzrvIQfw7//MIbKd45pQ87UUVmCTRdw7uK9JVlCIIdbHs6z0MFA6HKUQLNa6yhrXNRuuCfsb9XI1fGfHx5o2QxlmeI8YVQ6FTaO4NQdhX8T3AC/BAAA","boerewors":"data:image/webp;base64,UklGRsAAAABXRUJQVlA4ILQAAADQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoMYPYAhwA1zJAiQskebBnC1gAD993w3x72d5TKxxaVPQgwYwtzN9JQL+BSuSNbfT8dwsR4Ms4EMA4q/vdcqSBLzSJoOSZGPIari0bMMawa0HLQXiwHU/af78FiP6Caitf5IEEI5q/agM8uSfrK8G+o/g7M57a6Y/xaYuZrPdmP5LtEzTDECd76yyXbMCFB0kNg+cwhgAAA=","cat-buffet":"data:image/webp;base64,UklGRtIAAABXRUJQVlA4IMYAAACQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JagCsAdwLe5Yb6AAtYL0cyxvr6CAA/vK09v8YFdR4E8Z+fuwVOe6Qfam7wVUM/hB16iEIfujjM2aJ7e0cn4H1bxVOtCgvBTan2a0EujjvT5egNArq+Ii7pkSdxXwLcWtLXWs2phE4+WRD65bVnwBg8vdL15dvijAvBPaNXl9jwqIV5ZbGpVeslOvP2p3SSqXVGVGIbzLQe1Xj/7eh33MvFGoiv/QE9znXe1nAAAA=","cat-function":"data:image/webp;base64,UklGRtYAAABXRUJQVlA4IMoAAACwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoMh48AboJ0AJUMWXGIUXC5AAP7EEyEWt0mLit2ekHgdw4qovKM1h9Rh1fJMLitoNtaEUU95DFRHzQEi90Dkr7EU4s0XVPgz9Y46v898zCfNrbAxMKmB7pYJWLeJy302ab3h+nr7FHAfYY0tUUrbDssVztKB+An7EAH23QLnf+4x//+Vn9OZLDjI76zp8cBf2I598f2JKw1iQRpVt8ilGERjHceR5n7XtoAMAAAA","cat-launch":"data:image/webp;base64,UklGRqgAAABXRUJQVlA4IJwAAAAQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JZgCdAYvqq5P/eRW7gsBaAAD+v4v2k0hdTz7bDXzPlSinxzYzmES6EIFPAKjDw8qaJMOLm4xxKyTsSlpcyLSOaGJK1AD+z/02bPkUYR69JQ1Fz3cJyPVSpt3bkOE+G9a+frJ81urDV3tmxs8MfaMZylPCQYqKNVPngCO9oAMYM2YAAAA=","cat-office":"data:image/webp;base64,UklGRsAAAABXRUJQVlA4ILQAAABwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JYwC7AYvqu6xp0DoKjQzWmYFawAD6nku5i3G+7EJYvGb7h5mmFmQO2s51ZuW/RCFJ0jEM84BJgW3MCGNGi7dIEa6yg4H7iHpLD/EtNR678pDbKms8VmVOE7qqksx+9r3XuvK4pNZllF638+Zc37HpJ5wuZ9Nko6HDdWak2HuwC9xrwtt8Xu8ayyR+iKF0Gxf+lXfzkAbg/jMkAAA=","cat-party":"data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAABQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdEfqi2HXMoKMiu9ivjtCgAP7dp/MAopDbMzPb6uML2FeNrE9TxfqNtgk3Jl319WHO2qG1gyEGxG5AwXdQuwYZmeBvZw6yzg8M2M7SUY0or4tTC11WSsr5TdzVvNZSEqtvYWiXaBF354Uo4FB85IiKb58yz0wNSwXySMVL4PDCKevdAvP20ckyATdtPYqXOlO/KaWtBtAgtlESgpyAAAA=","chilli-cheese-chuck":"data:image/webp;base64,UklGRgABAABXRUJQVlA4IPQAAABQBgCdASoYACQAPu1qrlAppaQipWzJMB2JYgDE7RJFP0UXRegtRaabI/rmZweHnPV7Y6Tu9ufa0fNuAAD+9oR3zyxMr6DmzgIgy/TT+WJd+w26bXLgCn9dGNQlTRiO95FSI+qdpTO8H6llGRZ4I7204lUCYNwbYG3ZQ6FVAAk7IgoaOa4kgt8iOtFyNazTPwaECgSTWkC3vnSwSMbxyeTDQ9lZxPwGW4uAByKK1K0kCG+0jH5oZOHB2FIYS7ASWLb5GTPHK9Vc4/qlOGeDmF2AR6bf5d8+zTk1q3NadBL//cKrMM9vVke3MZ1HdoqKw678v4gA","chilli-fries":"data:image/webp;base64,UklGRkwBAABXRUJQVlA4IEABAACwBgCdASoYACAAPu1iqU2ppaOiMAgBMB2JbACdMuLKhYAWDPuTMpxBCTnCrc0jz0sBh8lLF+sAmNMvBnErgAD+6pL08jdsXyQPRtha/NSpb9Wkt2LsvbRojxAy05hktmokmHQCQjjzoiepoJP2+2fetzTpah9PA1xTdM7zcmB5WZz47B4Y6e+oGWrko4GxrA2obOecf361OZpIq1Y7mTJRKZsCchsOJk9NPuvZ2SamOC/7h745FW1atZ4D6+w4zwYF0LeBZn7mHbYqWiKESRvCwZIw9omw9F1VmKHt8QU6oCZuWKl7heRlPshnzwTwD1ykEC01pXW0d66DjiqQ28b5udfunWae6c0E4NCzYVdkE9D0vMhNNZuKZxXNp2g5Ue2/z4gOxQ+c+E1QpeZnNCpcs7rTCskAI4xSKaByjoAAAA==","chuck-norris":"data:image/webp;base64,UklGRqQAAABXRUJQVlA4IJgAAAAQBQCdASoYABQAPu1qrVCppaQiqAqpMB2JagC+aP8BfxY4PacbJdhyXfAGzlwQObgAAP7o0EdSXHgZMTZGFPBd+fkF239QmlVTs3UQpmMx1+ZD92NG+KUSdBI83UvRYD3GSefdrBsgEzq5y3ZxDPS57T3rA5kIf/g5BTUGx16DJEMxgoqHKSYetMu8tLKpcFTUPpQsoAAAAA==","course-dessert":"data:image/webp;base64,UklGRkoBAABXRUJQVlA4ID4BAAAwBwCdASoYAB4APu1opU2ppqMiMBgMATAdiWoAnTKDMyawas6nMyI1QPcOvev5re4ScKAmFycT9D+0FXasKnzEBoAA/lWgAcSEdkwfkWRsO/LxUx1mi1U5jx/gEI9DpCAVHen4VFeTmdgRbU8X6kSLDWir+vFs4wX1T9x81s1WClirM+HR/QrxLR3JC4WLTwP1J23z56iST/4ginOTsF/nJIhOrun5l7ck81x9cE3EReekcuPD/DjbMkGqAccwoN3QKMLUmMDSPPO9mTOvovaS6o08VHFU+PPA43NYqHxqX21OvBUqF2q6SA8TpYRs7jRoYJEVH2YR38xKz4XkkmMiczPDlfIR418/u2Si/C15CjIxkRoD7Wrl+NTP6SFbTf88iqE698n3O25FGBekay4wQVDsEyu9G/fVv+DgAAA=","course-main":"data:image/webp;base64,UklGRuAAAABXRUJQVlA4INQAAADQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JYgC7AdwLeRc4BO3IXT08h0XSd5wIgAD+BuSAR4cfekBy9AvpGbAALSreXE9lHQigtobN7xpWZyf1MN7q30+Ut3npo1vnuTesO3qRwJ/CHe4PmiwLP2GlrezbwCJW2pqmu2cyreHLgVQcDWK7pUAbHpw/0VBUfLs41b+rNLaCf3fi2647797J/FZR06AbI3d87Qx7x7DrqvPE5u4XRfyyF56F8DBPHalwl4XFDsQBfPRPtorCa063YgAAAA==","course-starter":"data:image/webp;base64,UklGRtYAAABXRUJQVlA4IMoAAAAwBQCdASoYABgAPu1urlIppiQiqAgBMB2JbADE2Yu4cLQHYQeefKNS7dcO1/HbEffEAAD+6oH3lhXmrQM6+I05VxCcQaJ+rGp1Fcac8zg2HDF/z940lgUmgjVk0DF2ZI77PE+8vcZUkNnxW+RppaiUvr0RacuQ2LMT3mJ15WxK9WrdGRCLd47CxldM2V/teeU/XFfVtejaoQgMshlOV5mgYmsKBaewpJv47JUOy9oaF5Go8Tl5LM+SZia0FwXLE51iv6+8gqxbYAAA","fries":"data:image/webp;base64,UklGRpoAAABXRUJQVlA4II4AAACQBACdASoYABMAPu1gq1AppSOisBgIATAdiUAABc69CL9cjRrxQ7jgb+4aUEAA/vQbe7zaPAMMYa0DOfyOu1NWydAgDNsJgRqkRccenItRXGaxrmJWXBu/ksI5yL/CiqnG2eqO1WqRL7MrpzPWFwPbfVshKATgo71p9/2OkUA8vsiHKsvrLNlAd30RG3AA","gatsby":"data:image/webp;base64,UklGRsIAAABXRUJQVlA4ILYAAADQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoRwJoHh/qUAKVv/DaMr3+1cYAD+pnQ29v5wg2rVaGsYg+rzk8aBhIPgrv3MRD6obC+TXeahHJcoGxqgczKaly5RuwgbTGAT7+VxFIksfoKzfHNX4H2D82rMN5VC877YKq8vQEJiVsWumCx5sXzTMXm49Ay/LPWOhUcuxMOO8AEvk9UR0qkSHm6FnEX8cDWwbC+pzJI0zqOAAA==","hot-dogs":"data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAABwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoR3AdEMgz2d5aJLM3jq4AD+6/5FMuA+ImCF5R9yDSisjW0LWtf1oryNjpnWhPAN697fPmCP/CKJQ9W9la0yPoW2Stm81Vsu7ap9akLnaKu/D9XVoFWER5l99Bsde8nuab5UEucZp04q7ZzSJj7/yo+W2VDIb2tgEuGy2uljH2GoiBgL/2uKeiT+3JyS7oCBAAA=","loaded-fries":"data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAABwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JZgC7H8AgsRiU55idskewReflsAD+7onXb3PhjmLZv1AHPLbkJnvlnsVDWln51OnAfpHvON6ae1aucxwjIK92hws1qb9S6tLY14defCH+f5N2clH39l2uZcaFghzbnJN79jQsVfcqyFcqgAA=","masala-steak":"data:image/webp;base64,UklGRsQAAABXRUJQVlA4ILgAAADwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACsL1yrgBcOn6ifl3Ox88FZAZEBjgAA/u6Kpb+8qJV0LOBjAYPw4a2jw2NTMQ2AysOgs+LJZThS3iO2ioufy4UkRmooFgBT7XDwtUC+J7YoDWHFvzw12I20hC4sX3/5rFPus2lkRB6i+aV49DDZB5TVRM/kI/LmAN7GWsadH/jtf9qYDYU9BGHnAttt44SirCWRJ0mJC789IiQowAAA","onion-rings":"data:image/webp;base64,UklGRn4BAABXRUJQVlA4IHIBAADQBwCdASoYACQAPu1iqk6ppSOiKqwBMB2JbAC/a5KOH3snCFHxP4dNSFuo0Xxi2d4g7Ss5xzs3QExw7E9MEF68gWcZ6fjwwADUPW7PEEKV49rdJoDDI0okvMQM/FG8vcKw0Q/yfDnmN3qxKB6YqKex6CJRWa2PWi5J24XDRilx1HsYrrFjSzAXHG4dPdcGoL9eULH3HAkRLOlLd+CMWrfNv6/s6LLEDPCqTJE/cJDbJNb+b+J65jzbcliqfBKCJkobNoiXlQPr6LP0lw3xYFo8HwG+aV9rpd+oUF3qxXnemfn7Ewku0UfxmG78ZpKOsOVRoERqPNIdmNYjHoNIk5BPxbJfF9SmiPvCfROmiCRKrSzYdRRlOQVSq/vSqPDL4zKy3uFVjjWtSRD2Hc+aktcB5eys4w3aPV2XgG3jckjN5ous9vB51zIfWjpzy5otY1XqAiNcvS9gXpGv+XdO5IPLhzRqvclTVoh8GYXoZSQDUAAA","parcel":"data:image/webp;base64,UklGRgwBAABXRUJQVlA4IAABAACwBgCdASoYACQAPu1kqk6ppaOiKqwBMB2JYgDOOd0jf1TpNieNONCBSq//QnfZrbndYTCZEmhrH7ZJdHFlAAD+8zWiiLD6uTZEnM/0BwRwvQlhj+KcNNwTT+MaP4DW5sPZiYk+m2MRC1VGcPIPsJrxxsJpSF932YdyXEgwUH4GZdBhXPw+HFg+X78kli5qQDbPI0y/26sExbfxTsE3dtkJnSSVojUhhoIL3XMJ12rGV833pYvRFdOkTlaAMC+zn70RXojvykr6C9KiREDEuyZyIeOpE9pxTqyGIJYk1WguK1pEqfpLO/kLU1sUEWp9QZhmiDqGOZvuXWZBU4I+DAAA","philly":"data:image/webp;base64,UklGRgwBAABXRUJQVlA4IAABAADQBgCdASoYACQAPu1epk2ppSOiNVgIATAdiWQAuxH/4CEBYdXOiLxatWxe+Yx4ivZvR35JQKP9V/e12Cm+VAAA/uWfnPJ/DYlwkghxJYqf/SZMf0UAqvYKOm/9ydeqMPjWV/LBSznZsBmRFrh/Z7qCQh1k5OIjxmxlSHJ0wgzJTuP6aXhY+R3X/xZX4rh5H0OSytC62nZpPe+HTfiyMcT3r7z0YFlfmwIPoURq54Eodmmk3/0AeOPXKVRh3a4EFzast6CG/veKO1imZhbRv7yGhe7dYenfZu7iBKcwtNT0wPHwFdhMo0O9LnDOKoAwfCUJhi/e4L6C6SHBe30tRoAA","rib-n-chuck":"data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAACwBACdASoYABEAPu1orE8ppiQiMBgIATAdiWgAtOgQtfuc00NXzff65DHhZIFgAP7o0A/n60BNBHBdHavdm9ftnzHQXOw6yu6W/bIWdcaB7whIpQOHzoy3tVFsRIofjI0dX+jBh7n10J8fqKZX7P7OqYp6pdxtPYr8LtsDKRds9qlteMhSdmKNET6C9iSOrc+1qgAAAAA=","short-rib":"data:image/webp;base64,UklGRk4BAABXRUJQVlA4IEIBAABwBgCdASoYACAAPu1iqU2ppaOiMAgBMB2JYwC/Sfql38SXs1isaohY4cpxBfGrlQQgX3ZDvTDeAUA7x4AA/rxu7pp8rcW1Z/eqC17lunIyZyNlpDzFhKsKsCNuP+EVhT5jO9jTD1YlwNd0kd0GgiK2i8JWOUo7lJ5rGzbg67OAWDOW9qMO4oYcl9QBG/7lHN6y7RlGFlMwLpP7UhnpgY/17g7nt2NlTuUQsX2S5kPNxxEvyaNb8eFC9b+Lty/+GAq3HSHtQde2Tz2bx57GcCxW/OOIh4WgL7AOgoLPOKdU+Rz3vw33Gwzl4qos6AZOUdzRjGEzAFfG5m1i+K1dTgq0+ADDb2Wwr7NGreUM7k+kVjRSs//P7u8nsERk8qFUlFogn/Tvyp7plW0vOCr36Y3cih6IpwOdlWQ/sTErJtxy8AAA","sliders":"data:image/webp;base64,UklGRt4AAABXRUJQVlA4INIAAABwBQCdASoYAB4APu1qr1CppaQiqAqpMB2JQBfLP/xbKCza7+eN3VhdH1jigVe9RT1mu//wAP78R09XUavlzg0O5hPLDZzJ47i1YQDtgMq+5PMnZK09qzaIA7r0/gMCvyL52hU4AhX64Js/u/Ygsw69Ms2d6of/CRWCwoyZ4ituG04TDXiEPjPEoGd4GF/rlj1RxaDIzkcQZzJFPuadCGQA5CwmyN4/SZmrhHQCRoWoL+0c/tikfzFYqb+W8J6F3VlxYHRU04nQpf5xJI1vWvoAAAA=","tenders":"data:image/webp;base64,UklGRsgAAABXRUJQVlA4ILwAAABwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoLUANlchGMYD28bcPSaYAD9mTBJtwRCao00wgoWw41T0uW27tEoi3SkvdotqXqpmQ6zMMNbCLZE7AktAbD/T3lTRW/+xtnTNDhnpAERlNWF//0i6etzSiblJqirNedeNUvQxbKXWdghTsK+sxCwTtPq1gfyne3GT/KI2oiR+uDgj/hnUiPO8OV9Cn6gii7DfZKZoQfls4KE7FXr4sMgAA=="};
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 let n = 0, html = "";
@@ -552,8 +606,8 @@ for (const c of MENU) {
   for (const d of c.dishes) {
     n++;
     html += `<article class="dish" data-cat="${c.id}">
-      <div class="ph"><img src="img/${d.img}.jpg" alt="${esc(d.name)}" loading="${n < 3 ? "eager" : "lazy"}" decoding="async"></div>
-      <div class="card glass rv">
+      <div class="ph" style="background-image:url(${LQIP[d.img]})"><img ${n < 3 ? "src" : "data-src"}="img/${d.img}.webp" ${n < 3 ? "srcset" : "data-srcset"}="img/${d.img}-800.webp 800w, img/${d.img}.webp 1400w" sizes="100vw" alt="${esc(d.name)}" decoding="async"${n < 3 ? ' fetchpriority="high"' : ""}></div>
+      <div class="card glass thick rv">
         <div class="num">${String(n).padStart(2, "0")} · ${esc(c.title)}</div><h3>${esc(d.name)}</h3><p>${esc(d.desc)}</p>
         <div class="prices">${d.prices.map(([l, p]) => `<div class="price">${l ? `<small>${esc(l)}</small>` : ""}<b>R${p}</b></div>`).join("")}</div>
       </div></article>`;
@@ -561,13 +615,32 @@ for (const c of MENU) {
   if (c.id === "gatsbys") html += `<div class="wrap"><div class="full-house glass rv"><span>Add Full House · egg, cheese, onion rings</span><span>R40</span></div></div>`;
 }
 html += `<div class="cat-title" id="extras" data-cat="extras"><div class="rv"><h2>Extras</h2></div></div><div class="wrap extras">
-  <div class="side-grid">${EXTRAS.map(([t, i, p], k) => `<div class="side glass rv" data-cat="extras" style="--d:${k * .07}s"><div class="im"><img src="img/${i}.jpg" alt="${esc(t)}" loading="lazy"></div><div class="t"><h3>${esc(t)}</h3><p>${esc(p)}</p></div></div>`).join("")}</div>
+  <div class="side-grid">${EXTRAS.map(([t, i, p], k) => `<div class="side glass rv" data-cat="extras" style="--d:${k * .07}s"><div class="im"><img src="img/${i}.webp" alt="${esc(t)}" loading="lazy"></div><div class="t"><h3>${esc(t)}</h3><p>${esc(p)}</p></div></div>`).join("")}</div>
   <div class="plain">${PLAIN.map(([t, p], k) => `<div class="glass rv" style="--d:${k * .07}s"><h3>${esc(t)}</h3><span>${esc(p)}</span></div>`).join("")}</div></div>`;
 document.getElementById("dishes").innerHTML = html;
 
 const cats = [...MENU.map(c => [c.id, c.title]), ["extras", "Extras"]];
 const catNav = document.getElementById("cats");
 catNav.insertAdjacentHTML("beforeend", cats.map(([id, t]) => `<a href="#${id}" data-cat="${id}">${esc(t)}</a>`).join(""));
+
+
+/* ---------- smooth image loading ---------- */
+/* photos fade in over a blurred preview, and start downloading well before you reach them */
+function fadeIn(img) {
+  if (img.complete && img.naturalWidth) img.classList.add("loaded");
+  else img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
+}
+const load = img => { if (img.dataset.srcset) img.srcset = img.dataset.srcset; if (img.dataset.src) img.src = img.dataset.src; delete img.dataset.src; delete img.dataset.srcset; fadeIn(img); };
+const lio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { load(e.target); lio.unobserve(e.target); } }), { rootMargin: "250% 0px" });
+document.querySelectorAll(".dish .ph img").forEach(img => img.dataset.src ? lio.observe(img) : fadeIn(img));
+/* once the first screen is ready, quietly fetch everything else so scrolling and page switches never wait */
+addEventListener("load", () => {
+  const warm = () => {
+    document.querySelectorAll("img[data-src]").forEach(load);
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => { img.loading = "eager"; });
+  };
+  (window.requestIdleCallback || (f => setTimeout(f, 1200)))(warm, { timeout: 2500 });
+});
 
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -626,6 +699,7 @@ if (!reduce) {
 const pages = ["menu", "catering", "about"];
 const catIds = new Set(cats.map(c => c[0]));
 const seg = document.getElementById("seg");
+const tabbar = document.getElementById("tabbar");
 let currentPage = null;
 
 function render(page, anchor) {
@@ -633,6 +707,9 @@ function render(page, anchor) {
   let active;
   seg.querySelectorAll("a").forEach(a => { const on = a.dataset.page === page; a.toggleAttribute("aria-current", on); if (on) active = a; });
   moveLens(seg, active);
+  let tActive;
+  tabbar.querySelectorAll("a").forEach(a => { const on = a.dataset.page === page; a.toggleAttribute("aria-current", on); if (on) tActive = a; });
+  moveLens(tabbar, tActive);
   document.documentElement.classList.toggle("snap", page === "menu");
   if (anchor) document.getElementById(anchor).scrollIntoView({ behavior: "instant" });
   else window.scrollTo({ top: 0, behavior: "instant" });
@@ -650,9 +727,9 @@ function route() {
   else render(page, anchor);
 }
 addEventListener("hashchange", route);
-addEventListener("resize", () => { moveLens(seg, seg.querySelector("a[aria-current]")); moveLens(catNav, catNav.querySelector("a.on")); });
+addEventListener("resize", () => { moveLens(seg, seg.querySelector("a[aria-current]")); moveLens(tabbar, tabbar.querySelector("a[aria-current]")); moveLens(catNav, catNav.querySelector("a.on")); });
 route();
-document.fonts && document.fonts.ready.then(() => { moveLens(seg, seg.querySelector("a[aria-current]")); moveLens(catNav, catNav.querySelector("a.on") || catNav.querySelector("a")); });
+document.fonts && document.fonts.ready.then(() => { moveLens(seg, seg.querySelector("a[aria-current]")); moveLens(tabbar, tabbar.querySelector("a[aria-current]")); moveLens(catNav, catNav.querySelector("a.on") || catNav.querySelector("a")); });
 
 /* ---------- WhatsApp chat ---------- */
 const chat = document.getElementById("chat"), waBtn = document.getElementById("wa-btn"), msg = document.getElementById("chat-msg");
