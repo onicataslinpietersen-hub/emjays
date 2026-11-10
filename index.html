@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#231c16">
 <title>EmJay's | Wynberg</title>
 <meta name="description" content="EmJay's at The Queens, 11 Byrnes Avenue, Wynberg. Halaal burgers, gatsbys, long rolls and catering. Better food, better mood.">
 <link rel="icon" href="logo.png">
@@ -11,22 +12,35 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Roboto+Condensed:wght@400;500&family=Yellowtail&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #231c16;        /* warm espresso brown */
+    --bg: #231c16;
     --bg-2: #2d241c;
-    --bg-3: #3a2f25;
-    --rule: #4a3d30;
     --amber: #eaa23c;
     --amber-2: #f5b95c;
-    --cream: #f3ead8;
-    --grey: #b6a894;
-    --head: 64px;
+    --cream: #f5ede0;
+    --grey: #c2b5a2;
+    --rule: rgba(255,240,220,.12);
+
+    /* liquid glass */
+    --glass: rgba(255, 244, 228, .09);
+    --glass-strong: rgba(255, 244, 228, .16);
+    --glass-edge: rgba(255, 248, 236, .28);
+    --glass-blur: blur(22px) saturate(185%) brightness(1.06);
+    --glass-shadow:
+      inset 0 1px 0 rgba(255,255,255,.38),
+      inset 0 -1px 0 rgba(255,255,255,.07),
+      inset 0 0 18px rgba(255,255,255,.05),
+      0 10px 34px rgba(0,0,0,.34);
+
+    --spring: cubic-bezier(.34, 1.45, .64, 1);
+    --ease: cubic-bezier(.22, 1, .36, 1);
   }
-  * { box-sizing: border-box; }
-  html { scroll-padding-top: var(--head); }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
   html.snap { scroll-snap-type: y proximity; }
   body {
     margin: 0; background: var(--bg); color: var(--cream);
     font: 400 16px/1.5 "Roboto Condensed", "Arial Narrow", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
   }
   a { color: inherit; }
   img { display: block; max-width: 100%; }
@@ -36,271 +50,359 @@
   h1, h2, h3 { font-family: "Oswald", sans-serif; font-weight: 500; text-transform: uppercase; margin: 0; letter-spacing: .5px; }
   .script { font-family: "Yellowtail", cursive; text-transform: none; color: var(--amber); font-weight: 400; letter-spacing: 0; }
 
-  /* ---------- header ---------- */
+  /* ambient warm light behind everything, so the glass has colour to bend */
+  .ambient { position: fixed; inset: -20vmax; z-index: -1; pointer-events: none; filter: blur(60px); }
+  .ambient i { position: absolute; border-radius: 50%; opacity: .55; animation: drift 26s var(--ease) infinite alternate; }
+  .ambient i:nth-child(1) { width: 60vmax; height: 60vmax; left: 0; top: 0; background: radial-gradient(circle, #8a4f12, transparent 65%); }
+  .ambient i:nth-child(2) { width: 55vmax; height: 55vmax; right: 0; top: 30%; background: radial-gradient(circle, #6b2f14, transparent 65%); animation-duration: 32s; animation-delay: -8s; }
+  .ambient i:nth-child(3) { width: 45vmax; height: 45vmax; left: 30%; bottom: 0; background: radial-gradient(circle, #a8731f, transparent 65%); opacity: .35; animation-duration: 38s; animation-delay: -15s; }
+  @keyframes drift { to { transform: translate3d(8vmax, -6vmax, 0) scale(1.15); } }
+
+  /* ---------- the glass material ---------- */
+  .glass {
+    position: relative; isolation: isolate;
+    background: var(--glass);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-edge);
+    box-shadow: var(--glass-shadow);
+  }
+  /* specular sheen across the top, like light on curved glass */
+  .glass::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.04) 38%, rgba(255,255,255,0) 60%),
+      radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,.14), transparent 50%);
+  }
+
+  /* ---------- floating header ---------- */
   header.top {
-    position: sticky; top: 0; z-index: 30; height: var(--head);
-    background: rgba(35,28,22,.94); backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--rule);
+    position: fixed; z-index: 40; top: max(12px, env(safe-area-inset-top)); left: 50%;
+    transform: translateX(-50%); width: min(1080px, calc(100% - 24px));
+    height: 60px; border-radius: 999px; padding: 0 8px 0 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    view-transition-name: topbar;
+    transition: background .4s var(--ease), box-shadow .4s var(--ease);
   }
-  header.top .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  header.top img { width: 120px; }
-  nav.pages { display: flex; gap: 26px; }
-  nav.pages a {
-    font: 500 17px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase;
-    text-decoration: none; color: var(--grey); padding: 6px 0; border-bottom: 2px solid transparent;
+  header.top img { width: 104px; }
+  .seg { position: relative; display: flex; padding: 4px; border-radius: 999px; background: rgba(0,0,0,.18); }
+  .seg a {
+    position: relative; z-index: 1; text-decoration: none; padding: 9px 18px 8px; border-radius: 999px;
+    font: 500 15px "Oswald", sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey);
+    transition: color .35s var(--ease); white-space: nowrap;
   }
-  nav.pages a:hover { color: var(--cream); }
-  nav.pages a[aria-current] { color: var(--amber); border-color: var(--amber); }
+  .seg a[aria-current] { color: var(--cream); }
+  /* the sliding glass lens */
+  .lens {
+    position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.10));
+    border: 1px solid rgba(255,255,255,.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 4px 14px rgba(0,0,0,.25);
+    transition: transform .55s var(--spring), width .55s var(--spring);
+  }
+  .lens.squish { animation: squish .45s var(--ease); }
+  @keyframes squish { 40% { scale: 1.08 .86; } }
 
-  /* ---------- menu: one dish per screen ---------- */
-  .menu-intro { text-align: center; padding: 56px 20px 40px; scroll-snap-align: start; }
-  .menu-intro img { width: min(300px, 70vw); margin: 0 auto; }
-  .strap { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px;
-    font: 500 15px "Oswald", sans-serif; letter-spacing: 5px; text-transform: uppercase; }
-  .strap::before, .strap::after { content: ""; width: 60px; height: 1px; background: var(--amber); }
-  .menu-intro p { color: var(--grey); max-width: 520px; margin: 16px auto 0; }
-  .halal { display: inline-block; margin-top: 18px; border: 1px solid var(--amber); color: var(--amber);
-    border-radius: 30px; padding: 3px 14px; font: 500 13px "Oswald", sans-serif; letter-spacing: 2px; }
-  .notice { margin: 22px auto 0; max-width: 640px; font-size: 15px; color: var(--grey);
-    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 10px 0; }
-  .notice b { color: var(--cream); font-weight: 500; }
-  .notice a { color: var(--amber); }
-  .scroll-hint { margin-top: 26px; font: 500 13px "Oswald", sans-serif; letter-spacing: 3px; color: var(--amber); text-transform: uppercase; }
-  .scroll-hint span { display: block; font-size: 20px; animation: bob 1.6s ease-in-out infinite; }
-  @keyframes bob { 50% { transform: translateY(6px); } }
-
-  .cats {
-    position: sticky; top: var(--head); z-index: 20;
-    background: var(--bg); border-bottom: 1px solid var(--rule);
-    display: flex; gap: 22px; overflow-x: auto; padding: 0 20px; scrollbar-width: none;
-    justify-content: safe center;
+  /* ---------- menu ---------- */
+  .intro {
+    position: relative; min-height: 100svh; display: grid; place-items: center; text-align: center;
+    padding: 110px 20px 60px; scroll-snap-align: start; overflow: hidden;
   }
+  .intro .bgimg { position: absolute; inset: 0; z-index: -1; }
+  .intro .bgimg img { width: 100%; height: 100%; object-fit: cover; opacity: .75; transform: scale(1.08); }
+  .intro .bgimg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(35,28,22,.45), rgba(35,28,22,.95) 75%); }
+  .intro-card { border-radius: 32px; padding: 38px 34px 30px; max-width: 560px; }
+  .intro-card > img { width: min(280px, 64vw); margin: 0 auto; filter: drop-shadow(0 6px 18px rgba(0,0,0,.5)); }
+  .strap { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px;
+    font: 500 14px "Oswald", sans-serif; letter-spacing: 5px; text-transform: uppercase; }
+  .strap::before, .strap::after { content: ""; width: 44px; height: 1px; background: var(--amber); }
+  .chip { display: inline-block; margin-top: 16px; border-radius: 999px; padding: 4px 14px; font: 500 13px "Oswald", sans-serif; letter-spacing: 2px; color: var(--amber); }
+  .intro-card .notice { margin: 18px 0 0; font-size: 15px; color: var(--grey); }
+  .intro-card .notice b { color: var(--cream); font-weight: 500; }
+  .intro-card .notice a { color: var(--amber); }
+  .scroll-hint { margin-top: 22px; font: 500 12px "Oswald", sans-serif; letter-spacing: 3px; color: var(--amber); text-transform: uppercase; }
+  .scroll-hint span { display: block; font-size: 20px; animation: bob 1.8s var(--ease) infinite; }
+  @keyframes bob { 50% { transform: translateY(7px); } }
+
+  .cats-wrap { position: sticky; top: calc(max(12px, env(safe-area-inset-top)) + 70px); z-index: 30; height: 0; display: flex; justify-content: center; align-items: flex-start; pointer-events: none; }
+  .cats { background: rgba(30,22,16,.5); pointer-events: auto; max-width: calc(100% - 24px); overflow-x: auto; scrollbar-width: none; border-radius: 999px; padding: 4px; position: relative; display: flex; }
   .cats::-webkit-scrollbar { display: none; }
-  .cats a { flex: none; text-decoration: none; padding: 11px 0 9px; border-bottom: 2px solid transparent;
-    font: 500 14px "Oswald", sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); }
-  .cats a.on { color: var(--amber); border-color: var(--amber); }
+  .cats a { position: relative; z-index: 1; flex: none; text-decoration: none; padding: 7px 14px 6px; border-radius: 999px;
+    font: 500 13px "Oswald", sans-serif; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); transition: color .3s var(--ease); }
+  .cats a.on { color: var(--cream); }
+  .cats .lens { top: 4px; bottom: 4px; }
 
-  .cat-title { scroll-snap-align: start; padding: 54px 20px 18px; text-align: center; }
-  .cat-title h2 { font-size: clamp(34px, 6vw, 56px); color: var(--amber); line-height: 1; }
-  .cat-title p { color: var(--grey); margin: 8px 0 0; }
+  .cat-title { scroll-snap-align: start; min-height: 46svh; display: grid; place-items: center; text-align: center; padding: 150px 20px 40px; }
+  .cat-title h2 { font-size: clamp(42px, 8vw, 92px); line-height: .95; color: var(--amber); }
+  .cat-title p { color: var(--grey); margin: 12px 0 0; }
 
-  .dish {
-    position: relative; scroll-snap-align: start;
-    height: calc(100svh - var(--head) - 44px); min-height: 460px; max-height: 900px;
-    margin: 0 auto 14px; max-width: 1120px; overflow: hidden; border-radius: 6px;
-    background: var(--bg-2);
+  .dish { position: relative; height: 100svh; min-height: 560px; overflow: hidden; scroll-snap-align: start; background: #18130f; }
+  .dish .ph { position: absolute; inset: 0; overflow: hidden; }
+  .dish .ph img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); will-change: transform; }
+  .dish::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgba(20,15,11,.75) 0%, rgba(20,15,11,.15) 40%, rgba(20,15,11,0) 70%, rgba(20,15,11,.35) 100%); }
+  .dish .card {
+    position: absolute; z-index: 2; left: max(24px, calc(50% - 540px)); bottom: 32px;
+    width: min(560px, calc(100% - 48px)); border-radius: 28px; padding: 24px 26px 22px;
   }
-  .dish img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .dish::after { content: ""; position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(28,22,17,.96) 0%, rgba(28,22,17,.75) 30%, rgba(28,22,17,0) 62%); }
-  .dish .info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 32px 36px;
-    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
-  .dish .num { font: 500 13px "Oswald", sans-serif; letter-spacing: 3px; color: var(--amber); }
-  .dish h3 { font-size: clamp(30px, 5vw, 52px); line-height: 1.02; margin: 4px 0 8px; }
-  .dish p { margin: 0; color: #e0d4c0; max-width: 46ch; font-size: 17px; }
-  .prices { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-  .price { background: rgba(35,28,22,.85); border: 1px solid var(--rule); border-radius: 6px;
-    padding: 8px 14px; text-align: center; min-width: 84px; }
-  .price small { display: block; font-size: 12px; color: var(--grey); text-transform: uppercase; letter-spacing: 1px; }
-  .price b { font: 500 24px "Oswald", sans-serif; color: var(--amber); }
+  .dish .num { font: 500 12px "Oswald", sans-serif; letter-spacing: 3px; color: var(--amber); text-transform: uppercase; }
+  .dish h3 { font-size: clamp(30px, 4.6vw, 48px); line-height: 1.02; margin: 4px 0 8px; text-shadow: 0 2px 16px rgba(0,0,0,.35); }
+  .dish p { margin: 0; color: #eadfcc; font-size: 16px; }
+  .prices { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .price { border-radius: 16px; padding: 7px 14px 6px; min-width: 76px; text-align: center;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+  .price small { display: block; font-size: 11px; color: var(--grey); text-transform: uppercase; letter-spacing: 1px; }
+  .price b { font: 500 22px "Oswald", sans-serif; color: var(--amber-2); }
 
-  .side-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  .side { background: var(--bg-2); border-radius: 6px; overflow: hidden; }
-  .side img { aspect-ratio: 4/3; width: 100%; object-fit: cover; }
-  .side div { padding: 12px 14px 14px; }
+  .full-house { max-width: 1080px; margin: 18px auto 0; border-radius: 22px; padding: 16px 24px;
+    display: flex; justify-content: space-between; gap: 12px; font: 500 17px "Oswald", sans-serif; text-transform: uppercase; }
+  .full-house span:last-child { color: var(--amber); }
+
+  .extras { padding-bottom: 40px; }
+  .side-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .side { border-radius: 24px; overflow: hidden; padding: 8px; }
+  .side .im { border-radius: 18px; overflow: hidden; aspect-ratio: 4/3; }
+  .side img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
+  .side:hover img { transform: scale(1.06); }
+  .side div.t { padding: 12px 10px 6px; }
   .side h3 { font-size: 18px; }
   .side p { margin: 2px 0 0; color: var(--amber); font: 500 15px "Oswald", sans-serif; }
-  .plain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
-  .plain div { background: var(--bg-2); border-radius: 6px; padding: 14px; display: flex; justify-content: space-between; gap: 10px; }
+  .plain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  .plain > div { border-radius: 20px; padding: 16px 18px; display: flex; justify-content: space-between; gap: 10px; }
   .plain h3 { font-size: 17px; }
   .plain span { color: var(--amber); font: 500 15px "Oswald", sans-serif; text-align: right; }
-  .full-house { margin: 0 auto 14px; max-width: 1120px; background: var(--amber); color: var(--bg); border-radius: 6px;
-    padding: 14px 22px; display: flex; justify-content: space-between; font: 500 18px "Oswald", sans-serif; text-transform: uppercase; }
 
-  .motd { text-align: center; padding: 60px 20px; scroll-snap-align: start; }
-  .motd .script { font-size: clamp(44px, 8vw, 76px); line-height: 1; transform: rotate(-3deg); display: inline-block; }
+  .motd { text-align: center; padding: 90px 20px 40px; }
+  .motd .script { font-size: clamp(48px, 9vw, 84px); line-height: 1; transform: rotate(-3deg); display: inline-block; }
   .motd .script span { display: block; color: var(--cream); font-size: .7em; padding-left: 1.2em; }
-  .motd p { color: var(--grey); margin: 18px 0 0; }
+  .motd p { color: var(--grey); margin: 20px 0 0; }
 
-  /* ---------- catering ---------- */
-  .hero-sm { padding: 56px 0 30px; }
-  .hero-sm h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.05; }
-  .hero-sm h1 .script { display: block; font-size: 1.15em; }
-  .hero-sm p { color: var(--grey); max-width: 600px; font-size: 18px; margin: 14px 0 0; }
-  .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 40px 0 16px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
-  .sec-h h2 { font-size: 28px; color: var(--amber); }
+  /* ---------- catering / about ---------- */
+  .page { padding-top: 96px; }
+  .hero-sm { padding: 50px 0 20px; }
+  .hero-sm h1 { font-size: clamp(38px, 6.4vw, 66px); line-height: 1.02; }
+  .hero-sm h1 .script { display: block; font-size: 1.12em; }
+  .hero-sm p { color: var(--grey); max-width: 600px; font-size: 18px; margin: 16px 0 0; }
+  .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 54px 0 18px; }
+  .sec-h h2 { font-size: 30px; color: var(--amber); }
   .sec-h p { margin: 0; color: var(--grey); font-size: 15px; }
 
-  .places { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
-  .place { position: relative; border-radius: 6px; overflow: hidden; grid-column: span 2; aspect-ratio: 4/3; }
+  .places { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  .place { position: relative; margin: 0; border-radius: 26px; overflow: hidden; grid-column: span 2; aspect-ratio: 4/3; }
   .place.big { grid-column: span 3; aspect-ratio: 16/10; }
-  .place img { width: 100%; height: 100%; object-fit: cover; }
-  .place::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(28,22,17,.9), transparent 55%); }
-  .place div { position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 1; }
-  .place h3 { font-size: 21px; }
-  .place p { margin: 0; color: #ddd0bb; font-size: 14px; }
+  .place img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
+  .place:hover img { transform: scale(1.05); }
+  .place figcaption { position: absolute; left: 10px; right: 10px; bottom: 10px; border-radius: 18px; padding: 12px 16px; background: rgba(30,22,16,.42); }
+  .place h3 { font-size: 20px; }
+  .place p { margin: 0; color: #e6dac6; font-size: 14px; }
 
-  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .tier { background: var(--bg-2); border: 1px solid var(--rule); border-radius: 8px; padding: 22px; display: flex; flex-direction: column; }
-  .tier.feat { border-color: var(--amber); }
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .tier { border-radius: 28px; padding: 26px; display: flex; flex-direction: column; transition: transform .5s var(--spring); }
+  .tier:hover { transform: translateY(-4px); }
+  .tier.feat { border-color: rgba(234,162,60,.7); box-shadow: var(--glass-shadow), 0 0 0 1px rgba(234,162,60,.25), 0 20px 50px rgba(234,162,60,.12); }
+  .tier .badge { align-self: flex-start; font: 500 11px "Oswald", sans-serif; letter-spacing: 2px; color: var(--bg); background: var(--amber); border-radius: 999px; padding: 3px 10px; margin-bottom: 10px; }
   .tier h3 { font-size: 22px; }
-  .tier .pp { margin: 10px 0 2px; font: 500 46px/1 "Oswald", sans-serif; color: var(--amber); }
+  .tier .pp { margin: 10px 0 2px; font: 500 50px/1 "Oswald", sans-serif; color: var(--amber); }
   .tier .pp small { font-size: 16px; color: var(--grey); font-family: "Roboto Condensed"; margin-left: 4px; }
-  .tier ul { list-style: none; padding: 0; margin: 14px 0 0; }
-  .tier li { padding: 8px 0; border-top: 1px solid var(--rule); font-size: 15px; }
-  .tier li b { font-weight: 500; color: var(--cream); }
+  .tier ul { list-style: none; padding: 0; margin: 16px 0 0; }
+  .tier li { padding: 9px 0; border-top: 1px solid var(--rule); font-size: 15px; }
+  .tier li b { font-weight: 500; }
   .tier li span { color: var(--grey); }
   .tier .ex { margin-top: auto; padding-top: 14px; color: var(--grey); font-size: 14px; }
 
-  .courses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
-  .course { background: var(--bg-2); border-radius: 6px; overflow: hidden; }
-  .course img { aspect-ratio: 3/2; width: 100%; object-fit: cover; }
-  .course div { padding: 14px 16px 16px; }
+  .courses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 18px; }
+  .course { border-radius: 26px; overflow: hidden; padding: 8px; }
+  .course .im { border-radius: 20px; overflow: hidden; aspect-ratio: 3/2; }
+  .course img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
+  .course:hover img { transform: scale(1.05); }
+  .course .t { padding: 14px 12px 10px; }
   .course small { color: var(--amber); font: 500 12px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase; }
   .course h3 { font-size: 20px; margin-top: 2px; }
   .course p { margin: 4px 0 0; color: var(--grey); font-size: 15px; }
-  .fine { color: var(--grey); font-size: 14px; margin: 14px 0 0; }
+  .fine { color: var(--grey); font-size: 14px; margin: 16px 0 0; }
 
-  .cta { margin: 44px 0 0; background: var(--bg-3); border-radius: 8px; padding: 26px 28px;
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
-  .cta h2 { font-size: 28px; }
+  .cta { margin: 54px 0 0; border-radius: 30px; padding: 28px 30px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+  .cta h2 { font-size: 30px; }
   .cta p { margin: 4px 0 0; color: var(--grey); }
   .btns { display: flex; gap: 12px; flex-wrap: wrap; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px; padding: 11px 20px;
-    font: 500 16px "Oswald", sans-serif; letter-spacing: 1px; text-transform: uppercase; background: var(--amber); color: var(--bg); border: 0; cursor: pointer; }
-  .btn:hover { background: var(--amber-2); }
-  .btn.alt { background: none; color: var(--cream); border: 1px solid var(--rule); }
+  .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 999px; padding: 12px 22px;
+    font: 500 16px "Oswald", sans-serif; letter-spacing: 1px; text-transform: uppercase; border: 0; cursor: pointer;
+    background: linear-gradient(180deg, #f6bd62, #e39a2f); color: #2a1d0f;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 22px rgba(234,162,60,.28);
+    transition: transform .4s var(--spring), box-shadow .4s var(--ease); }
+  .btn.alt { background: rgba(255,255,255,.08); color: var(--cream); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  .btn:hover { transform: translateY(-2px); }
 
-  /* ---------- about ---------- */
-  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; padding: 56px 0 10px; }
-  .about img { border-radius: 8px; aspect-ratio: 4/5; object-fit: cover; width: 100%; }
-  .about h1 { font-size: clamp(36px, 5vw, 54px); line-height: 1.05; }
+  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; padding: 40px 0 10px; }
+  .about .im { border-radius: 32px; overflow: hidden; padding: 8px; }
+  .about .im img { border-radius: 26px; aspect-ratio: 4/5; object-fit: cover; width: 100%; }
+  .about h1 { font-size: clamp(38px, 5.4vw, 58px); line-height: 1.02; }
   .about h1 .script { display: block; font-size: 1.1em; }
-  .about p { color: #ddd0bb; font-size: 18px; margin: 16px 0 0; }
-  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; }
-  .fact { background: var(--bg-2); border-radius: 6px; padding: 18px; }
+  .about p { color: #e3d7c4; font-size: 18px; margin: 16px 0 0; }
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 44px; }
+  .fact { border-radius: 24px; padding: 20px; }
   .fact h3 { font-size: 15px; color: var(--amber); letter-spacing: 1.5px; }
   .fact p { margin: 6px 0 0; font-size: 16px; }
-  .fact a { color: var(--cream); }
 
   /* ---------- footer ---------- */
-  footer { margin-top: 70px; background: #1b1511; border-top: 1px solid var(--rule); padding: 30px 0 110px; }
-  .foot { display: grid; grid-template-columns: repeat(5, auto); justify-content: space-between; gap: 20px; }
-  .foot h4 { font: 500 13px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin: 0 0 4px; }
+  footer { padding: 70px 12px 110px; }
+  .foot { max-width: 1080px; margin: 0 auto; border-radius: 30px; padding: 26px 30px;
+    display: grid; grid-template-columns: repeat(5, auto); justify-content: space-between; gap: 20px; }
+  .foot h4 { font: 500 12px "Oswald", sans-serif; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin: 0 0 4px; }
   .foot p { margin: 0; color: var(--grey); font-size: 15px; }
   .foot a { color: var(--cream); text-decoration: none; }
-  .foot a:hover { color: var(--amber); }
 
-  /* ---------- WhatsApp chat ---------- */
-  .wa-btn { position: fixed; right: 18px; bottom: 18px; z-index: 50; border: 0; cursor: pointer;
-    display: flex; align-items: center; gap: 10px; background: #25d366; color: #fff; border-radius: 40px;
-    padding: 7px 18px 7px 7px; box-shadow: 0 8px 24px rgba(0,0,0,.45); font: 500 16px "Oswald", sans-serif; letter-spacing: .5px; }
+  /* ---------- WhatsApp ---------- */
+  .wa-btn { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 50; border: 0; cursor: pointer;
+    display: flex; align-items: center; gap: 10px; color: #fff; border-radius: 999px; padding: 7px 18px 7px 7px;
+    background: linear-gradient(180deg, rgba(60,226,124,.92), rgba(28,186,88,.92));
+    -webkit-backdrop-filter: blur(12px) saturate(180%); backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 6px rgba(0,0,0,.12), 0 12px 30px rgba(0,0,0,.4), 0 4px 18px rgba(37,211,102,.35);
+    font: 500 16px "Oswald", sans-serif; letter-spacing: .5px; transition: transform .45s var(--spring); }
   .wa-btn svg { width: 40px; height: 40px; flex: none; }
-  .wa-btn small { display: block; font: 400 12px "Roboto Condensed", sans-serif; opacity: .9; text-align: left; line-height: 1.1; }
   .wa-btn span { text-align: left; line-height: 1.15; }
-  .chat { position: fixed; right: 18px; bottom: 84px; z-index: 50; width: min(340px, calc(100vw - 36px));
-    background: #efe7dc; color: #1e1a16; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.5);
-    transform-origin: bottom right; animation: pop .18s ease-out; }
-  @keyframes pop { from { opacity: 0; transform: scale(.95) translateY(8px); } }
-  .chat-head { background: #075e54; color: #fff; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-  .chat-head img { width: 42px; height: 42px; border-radius: 50%; background: #111; object-fit: contain; padding: 3px; }
+  .wa-btn small { display: block; font: 400 12px "Roboto Condensed", sans-serif; opacity: .92; }
+  .wa-btn:hover { transform: translateY(-2px) scale(1.02); }
+
+  .chat { position: fixed; right: 16px; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 66px); z-index: 50;
+    width: min(350px, calc(100vw - 32px)); border-radius: 28px; overflow: hidden;
+    background: rgba(40,32,25,.55);
+    transform-origin: calc(100% - 40px) calc(100% + 30px);
+    opacity: 0; transform: scale(.6) translateY(20px); filter: blur(8px); visibility: hidden;
+    transition: opacity .3s var(--ease), transform .55s var(--spring), filter .35s var(--ease), visibility 0s .55s; }
+  .chat.open { opacity: 1; transform: none; filter: none; visibility: visible; transition: opacity .3s var(--ease), transform .55s var(--spring), filter .35s var(--ease), visibility 0s; }
+  .chat-head { padding: 14px 14px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--rule); }
+  .chat-head .av { width: 44px; height: 44px; border-radius: 50%; background: #1c1612; display: grid; place-items: center; border: 1px solid var(--glass-edge); }
+  .chat-head .av img { width: 36px; }
   .chat-head b { font: 500 17px "Oswald", sans-serif; display: block; }
-  .chat-head small { opacity: .85; }
-  .chat-head button { margin-left: auto; background: none; border: 0; color: #fff; font-size: 24px; cursor: pointer; line-height: 1; }
-  .chat-body { padding: 16px 14px; min-height: 120px; }
-  .bubble { background: #fff; border-radius: 0 8px 8px 8px; padding: 9px 12px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .chat-head small { color: var(--grey); }
+  .chat-head button { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--glass-edge); background: rgba(255,255,255,.1); color: var(--cream); font-size: 18px; cursor: pointer; line-height: 1; }
+  .chat-body { padding: 16px 14px; }
+  .bubble { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.16); border-radius: 6px 18px 18px 18px; padding: 9px 13px; max-width: 86%; font-size: 15px; width: fit-content;
+    opacity: 0; transform: translateY(8px) scale(.96); transition: opacity .4s var(--ease), transform .5s var(--spring); }
   .bubble + .bubble { margin-top: 6px; }
+  .chat.open .bubble { opacity: 1; transform: none; }
+  .chat.open .bubble:nth-child(2) { transition-delay: .12s; }
   .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-  .quick button { background: #fff; border: 1px solid #c9d8cf; color: #075e54; border-radius: 20px; padding: 5px 12px; font: 500 14px "Roboto Condensed", sans-serif; cursor: pointer; }
-  .chat form { display: flex; gap: 8px; padding: 10px; background: #f6f1ea; border-top: 1px solid #ddd3c6; }
-  .chat textarea { flex: 1; resize: none; height: 42px; border: 0; border-radius: 20px; padding: 10px 14px; font: 15px "Roboto Condensed", sans-serif; }
-  .chat form button { width: 42px; height: 42px; border-radius: 50%; border: 0; background: #25d366; color: #fff; cursor: pointer; display: grid; place-items: center; flex: none; }
+  .quick button { background: rgba(255,255,255,.08); border: 1px solid var(--glass-edge); color: var(--cream); border-radius: 999px; padding: 6px 12px; font: 500 14px "Roboto Condensed", sans-serif; cursor: pointer; transition: transform .35s var(--spring), background .3s; }
+  .quick button:hover { background: rgba(255,255,255,.16); }
+  .chat form { display: flex; gap: 8px; padding: 10px 12px 12px; }
+  .chat textarea { flex: 1; resize: none; height: 44px; border-radius: 999px; padding: 11px 16px; font: 15px "Roboto Condensed", sans-serif; color: var(--cream);
+    background: rgba(0,0,0,.22); border: 1px solid var(--glass-edge); }
+  .chat textarea::placeholder { color: var(--grey); }
+  .chat form button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); cursor: pointer; display: grid; place-items: center; flex: none;
+    background: linear-gradient(180deg, #3ce27c, #1cba58); box-shadow: inset 0 1px 0 rgba(255,255,255,.5); transition: transform .35s var(--spring); }
   .chat form svg { width: 20px; height: 20px; fill: #fff; }
 
+  /* springy press on everything tappable */
+  .btn:active, .wa-btn:active, .quick button:active, .chat form button:active, .seg a:active, .cats a:active { transform: scale(.94); transition-duration: .12s; }
+
+  /* ---------- reveal on scroll ---------- */
+  .rv { opacity: 0; transform: translateY(28px) scale(.985); filter: blur(6px);
+    transition: opacity .9s var(--ease), transform 1s var(--ease), filter .9s var(--ease); transition-delay: var(--d, 0s); }
+  .rv.in { opacity: 1; transform: none; filter: none; }
+
+  /* page transitions */
+  ::view-transition-old(root) { animation: .35s var(--ease) both pg-out; }
+  ::view-transition-new(root) { animation: .6s var(--ease) both pg-in; }
+  ::view-transition-group(topbar) { animation-duration: 0s; }
+  @keyframes pg-out { to { opacity: 0; transform: scale(.98); filter: blur(6px); } }
+  @keyframes pg-in { from { opacity: 0; transform: translateY(18px) scale(1.01); filter: blur(8px); } }
+
   @media (max-width: 860px) {
-    .side-grid { grid-template-columns: 1fr 1fr; }
-    .plain { grid-template-columns: 1fr 1fr; }
-    .tiers, .courses { grid-template-columns: 1fr; }
-    .places { grid-template-columns: 1fr 1fr; }
+    .side-grid, .plain, .places { grid-template-columns: 1fr 1fr; }
     .place, .place.big { grid-column: span 1; aspect-ratio: 4/3; }
+    .tiers, .courses { grid-template-columns: 1fr; }
     .about { grid-template-columns: 1fr; gap: 26px; }
-    .about img { aspect-ratio: 16/10; }
+    .about .im img { aspect-ratio: 16/10; }
     .facts { grid-template-columns: 1fr 1fr; }
     .foot { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 560px) {
-    :root { --head: 58px; }
-    header.top img { width: 96px; }
-    nav.pages { gap: 16px; }
-    nav.pages a { font-size: 15px; letter-spacing: 1.2px; }
-    .dish { border-radius: 0; margin-bottom: 8px; }
-    .dish .info { flex-direction: column; align-items: flex-start; padding: 22px 18px; gap: 14px; }
-    .dish::after { background: linear-gradient(to top, rgba(28,22,17,.97) 0%, rgba(28,22,17,.8) 40%, rgba(28,22,17,0) 70%); }
-    .prices { justify-content: flex-start; }
-    .price { min-width: 72px; padding: 6px 10px; }
-    .price b { font-size: 20px; }
-    .places { grid-template-columns: 1fr; }
-    .plain { grid-template-columns: 1fr; }
+    header.top { height: 54px; padding: 0 5px 0 14px; }
+    header.top img { width: 78px; }
+    .seg { padding: 3px; }
+    .seg a { font-size: 12.5px; letter-spacing: .8px; padding: 8px 11px 7px; }
+    .lens { top: 3px; bottom: 3px; }
+    .cats-wrap { top: calc(max(12px, env(safe-area-inset-top)) + 62px); }
+    .intro-card { padding: 30px 20px 24px; border-radius: 28px; }
+    .strap { letter-spacing: 3px; font-size: 13px; gap: 10px; }
+    .strap::before, .strap::after { width: 24px; }
+    .dish .card { left: 12px; width: calc(100% - 24px); bottom: max(84px, calc(env(safe-area-inset-bottom) + 76px)); padding: 18px 18px 16px; border-radius: 24px; }
+    .dish p { font-size: 15px; }
+    .price { min-width: 64px; padding: 6px 10px 5px; }
+    .price b { font-size: 19px; }
+    .places, .plain { grid-template-columns: 1fr; }
+    .side-grid { gap: 10px; }
     .foot { grid-template-columns: 1fr; }
     .sec-h { flex-direction: column; gap: 2px; }
-    .cats { justify-content: flex-start; }
+    .page { padding-top: 76px; }
   }
-  @media (prefers-reduced-motion: reduce) { .scroll-hint span, .chat { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01s !important; transition-delay: 0s !important; }
+    html { scroll-behavior: auto; }
+    .rv { opacity: 1; transform: none; filter: none; }
+    .dish .ph img { transform: none !important; }
+  }
 </style>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
 
-<header class="top">
-  <div class="wrap">
-    <a href="#menu" aria-label="EmJay's home"><img src="logo.png" alt="EmJay's" width="120" height="43"></a>
-    <nav class="pages">
-      <a href="#menu" data-page="menu">Menu</a>
-      <a href="#catering" data-page="catering">Catering</a>
-      <a href="#about" data-page="about">About us</a>
-    </nav>
-  </div>
+<header class="top glass">
+  <a href="#menu" aria-label="EmJay's home"><img src="logo.png" alt="EmJay's" width="104" height="38"></a>
+  <nav class="seg" id="seg">
+    <span class="lens" aria-hidden="true"></span>
+    <a href="#menu" data-page="menu">Menu</a>
+    <a href="#catering" data-page="catering">Catering</a>
+    <a href="#about" data-page="about">About</a>
+  </nav>
 </header>
 
 <!-- ================= MENU ================= -->
 <main id="page-menu">
-  <section class="menu-intro">
-    <img src="logo.png" alt="EmJay's" width="300" height="108">
-    <div class="strap">Better food better mood</div>
-    <span class="halal">حلال · 100% HALAAL</span>
-    <p class="notice"><b>Pool &amp; Dominos tournaments, 17–26 Nov.</b> R50 entry, cash prize for 1st. Entries close Mon 16th.
-      <a href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20to%20enter%20the%20tournament" target="_blank" rel="noopener">Enter on WhatsApp</a></p>
-    <div class="scroll-hint">Scroll the menu<span>↓</span></div>
+  <section class="intro">
+    <div class="bgimg" aria-hidden="true"><img src="img/chilli-cheese-chuck.jpg" alt=""></div>
+    <div class="intro-card glass rv">
+      <img src="logo.png" alt="EmJay's" width="280" height="101">
+      <div class="strap">Better food better mood</div>
+      <span class="chip glass">100% HALAAL · <bdi lang="ar">حلال</bdi></span>
+      <p class="notice"><b>Pool &amp; Dominos tournaments, 17–26 Nov.</b> R50 entry, cash prize for 1st. Entries close Mon 16th.
+        <a href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20to%20enter%20the%20tournament" target="_blank" rel="noopener">Enter on WhatsApp</a></p>
+      <div class="scroll-hint">Scroll the menu<span>↓</span></div>
+    </div>
   </section>
 
-  <nav class="cats" id="cats" aria-label="Menu sections"></nav>
+  <div class="cats-wrap"><nav class="cats glass" id="cats" aria-label="Menu sections"><span class="lens" aria-hidden="true"></span></nav></div>
   <div id="dishes"></div>
 
-  <section class="motd">
+  <section class="motd rv">
     <div class="script">Meal of the day<span>…everyday!</span></div>
     <p>Ask in store or WhatsApp us to find out what's on today. Delivery on Mr D &amp; Uber Eats.</p>
   </section>
 </main>
 
 <!-- ================= CATERING ================= -->
-<main id="page-catering" class="wrap" hidden>
-  <section class="hero-sm">
+<main id="page-catering" class="wrap page" hidden>
+  <section class="hero-sm rv">
     <h1>All you ever wanted to eat <span class="script">We'll make it!</span></h1>
     <p>Office lunches, birthdays, launches and functions. We cook, we bring it, you enjoy it. Every order is halaal and made fresh.</p>
   </section>
 
-  <div class="sec-h"><h2>Where we've been</h2><p>A few of the places we've fed</p></div>
+  <div class="sec-h rv"><h2>Where we've been</h2><p>A few of the places we've fed</p></div>
   <!-- Replace these photos and captions with real EmJay's events -->
   <div class="places">
-    <figure class="place big" style="margin:0"><img src="img/cat-launch.jpg" alt="Crowd at a launch day" loading="lazy"><div><h3>Canteen launch day</h3><p>The Queens, Wynberg</p></div></figure>
-    <figure class="place big" style="margin:0"><img src="img/cat-office.jpg" alt="Team lunch in an office" loading="lazy"><div><h3>Office lunches</h3><p>Delivered to your desk</p></div></figure>
-    <figure class="place" style="margin:0"><img src="img/cat-party.jpg" alt="Balloons at a birthday party" loading="lazy"><div><h3>Birthday parties</h3><p>Platters and slider boxes</p></div></figure>
-    <figure class="place" style="margin:0"><img src="img/cat-function.jpg" alt="Dressed tables at a function" loading="lazy"><div><h3>Functions</h3><p>Plated 3-course meals</p></div></figure>
-    <figure class="place" style="margin:0"><img src="img/cat-buffet.jpg" alt="Buffet spread" loading="lazy"><div><h3>Buffets</h3><p>Big crowds, big trays</p></div></figure>
+    <figure class="place big rv"><img src="img/cat-launch.jpg" alt="Crowd at a launch day" loading="lazy"><figcaption class="glass"><h3>Canteen launch day</h3><p>The Queens, Wynberg</p></figcaption></figure>
+    <figure class="place big rv" style="--d:.08s"><img src="img/cat-office.jpg" alt="Team lunch in an office" loading="lazy"><figcaption class="glass"><h3>Office lunches</h3><p>Delivered to your desk</p></figcaption></figure>
+    <figure class="place rv"><img src="img/cat-party.jpg" alt="Balloons at a birthday party" loading="lazy"><figcaption class="glass"><h3>Birthday parties</h3><p>Platters and slider boxes</p></figcaption></figure>
+    <figure class="place rv" style="--d:.08s"><img src="img/cat-function.jpg" alt="Dressed tables at a function" loading="lazy"><figcaption class="glass"><h3>Functions</h3><p>Plated 3-course meals</p></figcaption></figure>
+    <figure class="place rv" style="--d:.16s"><img src="img/cat-buffet.jpg" alt="Buffet spread" loading="lazy"><figcaption class="glass"><h3>Buffets</h3><p>Big crowds, big trays</p></figcaption></figure>
   </div>
 
-  <div class="sec-h"><h2>What it costs</h2><p>Example prices per person</p></div>
+  <div class="sec-h rv"><h2>What it costs</h2><p>Example prices per person</p></div>
   <div class="tiers">
-    <div class="tier">
+    <div class="tier glass rv">
       <h3>Office lunch</h3>
       <div class="pp">R95<small>per person</small></div>
       <ul>
@@ -310,7 +412,7 @@
       </ul>
       <p class="ex">Example: 20 people ≈ R1,900</p>
     </div>
-    <div class="tier">
+    <div class="tier glass rv" style="--d:.08s">
       <h3>Party platters</h3>
       <div class="pp">R150<small>per person</small></div>
       <ul>
@@ -320,7 +422,8 @@
       </ul>
       <p class="ex">Example: 30 people ≈ R4,500</p>
     </div>
-    <div class="tier feat">
+    <div class="tier glass feat rv" style="--d:.16s">
+      <span class="badge">MOST BOOKED FOR EVENTS</span>
       <h3>3-course meal</h3>
       <div class="pp">R350<small>per person</small></div>
       <ul>
@@ -333,13 +436,13 @@
   </div>
 
   <div class="courses">
-    <div class="course"><img src="img/course-starter.jpg" alt="Fresh salad bowl" loading="lazy"><div><small>Course 1</small><h3>Starter</h3><p>Fresh salads, samoosas and savouries to get things going.</p></div></div>
-    <div class="course"><img src="img/course-main.jpg" alt="Plated main course" loading="lazy"><div><small>Course 2</small><h3>Main</h3><p>Slow-cooked masala steak, saucy short rib or crispy chicken with sides.</p></div></div>
-    <div class="course"><img src="img/course-dessert.jpg" alt="Stack of glazed doughnuts" loading="lazy"><div><small>Course 3</small><h3>Dessert</h3><p>Doughnuts, cupcakes and something sweet to finish.</p></div></div>
+    <div class="course glass rv"><div class="im"><img src="img/course-starter.jpg" alt="Fresh salad bowl" loading="lazy"></div><div class="t"><small>Course 1</small><h3>Starter</h3><p>Fresh salads, samoosas and savouries to get things going.</p></div></div>
+    <div class="course glass rv" style="--d:.08s"><div class="im"><img src="img/course-main.jpg" alt="Plated main course" loading="lazy"></div><div class="t"><small>Course 2</small><h3>Main</h3><p>Slow-cooked masala steak, saucy short rib or crispy chicken with sides.</p></div></div>
+    <div class="course glass rv" style="--d:.16s"><div class="im"><img src="img/course-dessert.jpg" alt="Stack of glazed doughnuts" loading="lazy"></div><div class="t"><small>Course 3</small><h3>Dessert</h3><p>Doughnuts, cupcakes and something sweet to finish.</p></div></div>
   </div>
   <p class="fine">Prices are a guide. Your final quote depends on the menu, number of guests and delivery.</p>
 
-  <div class="cta">
+  <div class="cta glass rv">
     <div><h2>Get a quote</h2><p>Send us the date, number of people and what you'd like.</p></div>
     <div class="btns">
       <a class="btn" href="https://wa.me/27637920608?text=Hi%20EmJay's%2C%20I'd%20like%20a%20catering%20quote.%0ADate%3A%20%0ANumber%20of%20people%3A%20%0APackage%3A%20" target="_blank" rel="noopener">WhatsApp us</a>
@@ -349,26 +452,26 @@
 </main>
 
 <!-- ================= ABOUT ================= -->
-<main id="page-about" class="wrap" hidden>
+<main id="page-about" class="wrap page" hidden>
   <section class="about">
-    <div>
+    <div class="rv">
       <h1>Your new canteen <span class="script">right here.</span></h1>
       <p>EmJay's started with a simple idea: you shouldn't have to walk down the road for slap chips, order takeaways and promise yourself it's the last time, or settle for a sad desk lunch.</p>
       <p>So we opened a proper canteen at The Queens in Wynberg. Half-smashed burgers, thick nippy wors, masala steak, gatsbys built to share and a different meal of the day, every day. All halaal, all made fresh.</p>
       <p>Come sit with us, order to your office, or join one of our pool and dominos tournaments. Better food, better mood.</p>
     </div>
-    <img src="img/about.jpg" alt="Burger and fries" loading="lazy">
+    <div class="im glass rv" style="--d:.1s"><img src="img/about.jpg" alt="Burger and fries" loading="lazy"></div>
   </section>
   <div class="facts">
-    <div class="fact"><h3>Find us</h3><p><a href="https://www.google.com/maps/search/?api=1&query=11+Byrnes+Avenue+Wynberg+Cape+Town" target="_blank" rel="noopener">The Queens, 11 Byrnes Avenue, Wynberg</a></p></div>
-    <div class="fact"><h3>100% Halaal</h3><p>Everything on our menu.</p></div>
-    <div class="fact"><h3>Delivery</h3><p>To your office, or via Mr D &amp; Uber Eats.</p></div>
-    <div class="fact"><h3>Games</h3><p>Pool &amp; dominos tournaments with prizes.</p></div>
+    <div class="fact glass rv"><h3>Find us</h3><p><a href="https://www.google.com/maps/search/?api=1&query=11+Byrnes+Avenue+Wynberg+Cape+Town" target="_blank" rel="noopener">The Queens, 11 Byrnes Avenue, Wynberg</a></p></div>
+    <div class="fact glass rv" style="--d:.06s"><h3>100% Halaal</h3><p>Everything on our menu.</p></div>
+    <div class="fact glass rv" style="--d:.12s"><h3>Delivery</h3><p>To your office, or via Mr D &amp; Uber Eats.</p></div>
+    <div class="fact glass rv" style="--d:.18s"><h3>Games</h3><p>Pool &amp; dominos tournaments with prizes.</p></div>
   </div>
 </main>
 
 <footer>
-  <div class="wrap foot">
+  <div class="foot glass rv">
     <div><h4>Call / WhatsApp</h4><p><a href="tel:+27637920608">063 792 0608</a></p></div>
     <div><h4>Email</h4><p><!-- EMAIL: add later --></p></div>
     <div><h4>Find us</h4><p>The Queens, 11 Byrnes Ave, Wynberg</p></div>
@@ -378,11 +481,11 @@
 </footer>
 
 <!-- ================= WhatsApp chat ================= -->
-<div class="chat" id="chat" hidden role="dialog" aria-label="Chat with EmJay's on WhatsApp">
+<div class="chat glass" id="chat" role="dialog" aria-label="Chat with EmJay's on WhatsApp" aria-hidden="true">
   <div class="chat-head">
-    <img src="logo.png" alt="">
-    <div><b>EmJay's</b><small>063 792 0608</small></div>
-    <button type="button" id="chat-close" aria-label="Close chat">×</button>
+    <div class="av"><img src="logo.png" alt=""></div>
+    <div><b>EmJay's</b><small>WhatsApp · 063 792 0608</small></div>
+    <button type="button" id="chat-close" aria-label="Close chat">✕</button>
   </div>
   <div class="chat-body">
     <div class="bubble">Hi there 👋</div>
@@ -444,59 +547,121 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;",
 
 let n = 0, html = "";
 for (const c of MENU) {
-  html += `<div class="cat-title" id="${c.id}"><h2>${esc(c.title)}</h2>${c.note ? `<p>${esc(c.note)}</p>` : ""}</div>`;
+  html += `<div class="cat-title" id="${c.id}" data-cat="${c.id}"><div class="rv"><h2>${esc(c.title)}</h2>${c.note ? `<p>${esc(c.note)}</p>` : ""}</div></div>`;
   for (const d of c.dishes) {
     n++;
     html += `<article class="dish" data-cat="${c.id}">
-      <img src="img/${d.img}.jpg" alt="${esc(d.name)}" loading="${n < 3 ? "eager" : "lazy"}">
-      <div class="info">
-        <div><div class="num">${String(n).padStart(2, "0")} · ${esc(c.title)}</div><h3>${esc(d.name)}</h3><p>${esc(d.desc)}</p></div>
+      <div class="ph"><img src="img/${d.img}.jpg" alt="${esc(d.name)}" loading="${n < 3 ? "eager" : "lazy"}" decoding="async"></div>
+      <div class="card glass rv">
+        <div class="num">${String(n).padStart(2, "0")} · ${esc(c.title)}</div><h3>${esc(d.name)}</h3><p>${esc(d.desc)}</p>
         <div class="prices">${d.prices.map(([l, p]) => `<div class="price">${l ? `<small>${esc(l)}</small>` : ""}<b>R${p}</b></div>`).join("")}</div>
       </div></article>`;
   }
-  if (c.id === "gatsbys") html += `<div class="full-house"><span>Add Full House · egg, cheese, onion rings</span><span>R40</span></div>`;
+  if (c.id === "gatsbys") html += `<div class="wrap"><div class="full-house glass rv"><span>Add Full House · egg, cheese, onion rings</span><span>R40</span></div></div>`;
 }
-html += `<div class="cat-title" id="extras"><h2>Extras</h2></div><div class="wrap">
-  <div class="side-grid">${EXTRAS.map(([t, i, p]) => `<div class="side" data-cat="extras"><img src="img/${i}.jpg" alt="${esc(t)}" loading="lazy"><div><h3>${esc(t)}</h3><p>${esc(p)}</p></div></div>`).join("")}</div>
-  <div class="plain">${PLAIN.map(([t, p]) => `<div data-cat="extras"><h3>${esc(t)}</h3><span>${esc(p)}</span></div>`).join("")}</div></div>`;
+html += `<div class="cat-title" id="extras" data-cat="extras"><div class="rv"><h2>Extras</h2></div></div><div class="wrap extras">
+  <div class="side-grid">${EXTRAS.map(([t, i, p], k) => `<div class="side glass rv" data-cat="extras" style="--d:${k * .07}s"><div class="im"><img src="img/${i}.jpg" alt="${esc(t)}" loading="lazy"></div><div class="t"><h3>${esc(t)}</h3><p>${esc(p)}</p></div></div>`).join("")}</div>
+  <div class="plain">${PLAIN.map(([t, p], k) => `<div class="glass rv" style="--d:${k * .07}s"><h3>${esc(t)}</h3><span>${esc(p)}</span></div>`).join("")}</div></div>`;
 document.getElementById("dishes").innerHTML = html;
 
 const cats = [...MENU.map(c => [c.id, c.title]), ["extras", "Extras"]];
 const catNav = document.getElementById("cats");
-catNav.innerHTML = cats.map(([id, t]) => `<a href="#${id}" data-cat="${id}">${esc(t)}</a>`).join("");
+catNav.insertAdjacentHTML("beforeend", cats.map(([id, t]) => `<a href="#${id}" data-cat="${id}">${esc(t)}</a>`).join(""));
 
-/* highlight current category while scrolling */
-const io = new IntersectionObserver(es => {
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- liquid lens that slides under the active item ---------- */
+function moveLens(container, target) {
+  const lens = container.querySelector(".lens");
+  if (!lens || !target) return;
+  const prev = lens.dataset.x;
+  lens.style.width = target.offsetWidth + "px";
+  lens.style.transform = `translateX(${target.offsetLeft}px)`;
+  if (prev !== undefined && prev != target.offsetLeft) { lens.classList.remove("squish"); void lens.offsetWidth; lens.classList.add("squish"); }
+  lens.dataset.x = target.offsetLeft;
+}
+
+/* ---------- reveal on scroll ---------- */
+const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); } }),
+  { rootMargin: "0px 0px -8% 0px", threshold: .12 });
+const watchReveals = root => root.querySelectorAll(".rv:not(.in)").forEach(el => rio.observe(el));
+watchReveals(document);
+
+/* ---------- active category while scrolling ---------- */
+let currentCat = null;
+const cio = new IntersectionObserver(es => {
   for (const e of es) if (e.isIntersecting) {
-    const id = e.target.dataset.cat || e.target.id;
-    catNav.querySelectorAll("a").forEach(a => {
-      const on = a.dataset.cat === id;
-      a.classList.toggle("on", on);
-      if (on) a.scrollIntoView({ block: "nearest", inline: "center" });
-    });
+    const id = e.target.dataset.cat;
+    if (id === currentCat) continue;
+    currentCat = id;
+    let active;
+    catNav.querySelectorAll("a").forEach(a => { const on = a.dataset.cat === id; a.classList.toggle("on", on); if (on) active = a; });
+    moveLens(catNav, active);
+    if (active) catNav.scrollTo({ left: active.offsetLeft - catNav.clientWidth / 2 + active.offsetWidth / 2, behavior: "smooth" });
   }
 }, { rootMargin: "-45% 0px -50% 0px" });
-document.querySelectorAll(".dish, .cat-title, .side").forEach(el => io.observe(el));
+document.querySelectorAll("#dishes [data-cat]").forEach(el => cio.observe(el));
 
-/* ---------- pages ---------- */
+/* ---------- smooth parallax zoom on the dish photos ---------- */
+const photos = [...document.querySelectorAll(".dish .ph img"), document.querySelector(".intro .bgimg img")];
+let ticking = false;
+function parallax() {
+  ticking = false;
+  const vh = innerHeight;
+  for (const img of photos) {
+    const r = img.parentElement.getBoundingClientRect();
+    if (r.bottom < -50 || r.top > vh + 50) continue;
+    const p = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh)); // -1 .. 1
+    img.style.transform = `translate3d(0, ${p * 7}%, 0) scale(${1.1 + Math.abs(p) * .06})`;
+  }
+}
+if (!reduce) {
+  addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(parallax); } }, { passive: true });
+  addEventListener("resize", parallax);
+  parallax();
+}
+
+/* ---------- pages with smooth transitions ---------- */
 const pages = ["menu", "catering", "about"];
 const catIds = new Set(cats.map(c => c[0]));
+const seg = document.getElementById("seg");
+let currentPage = null;
+
+function render(page, anchor) {
+  for (const p of pages) document.getElementById("page-" + p).hidden = p !== page;
+  let active;
+  seg.querySelectorAll("a").forEach(a => { const on = a.dataset.page === page; a.toggleAttribute("aria-current", on); if (on) active = a; });
+  moveLens(seg, active);
+  document.documentElement.classList.toggle("snap", page === "menu");
+  if (anchor) document.getElementById(anchor).scrollIntoView({ behavior: "instant" });
+  else window.scrollTo({ top: 0, behavior: "instant" });
+  watchReveals(document.getElementById("page-" + page));
+  if (page === "menu") requestAnimationFrame(() => { const a = catNav.querySelector("a.on") || catNav.querySelector("a"); moveLens(catNav, a); parallax(); });
+}
 function route() {
   const h = location.hash.slice(1);
-  const page = pages.includes(h) ? h : "menu";
-  for (const p of pages) document.getElementById("page-" + p).hidden = p !== page;
-  document.querySelectorAll("nav.pages a").forEach(a => a.toggleAttribute("aria-current", a.dataset.page === page));
-  document.documentElement.classList.toggle("snap", page === "menu");
-  if (catIds.has(h)) document.getElementById(h).scrollIntoView();
-  else window.scrollTo(0, 0);
+  const page = catIds.has(h) ? "menu" : pages.includes(h) ? h : "menu";
+  const anchor = catIds.has(h) ? h : null;
+  if (page === currentPage) { if (anchor) document.getElementById(anchor).scrollIntoView({ behavior: reduce ? "instant" : "smooth" }); return; }
+  const first = currentPage === null;
+  currentPage = page;
+  if (!first && !reduce && document.startViewTransition) document.startViewTransition(() => render(page, anchor));
+  else render(page, anchor);
 }
 addEventListener("hashchange", route);
+addEventListener("resize", () => { moveLens(seg, seg.querySelector("a[aria-current]")); moveLens(catNav, catNav.querySelector("a.on")); });
 route();
+document.fonts && document.fonts.ready.then(() => { moveLens(seg, seg.querySelector("a[aria-current]")); moveLens(catNav, catNav.querySelector("a.on") || catNav.querySelector("a")); });
 
 /* ---------- WhatsApp chat ---------- */
 const chat = document.getElementById("chat"), waBtn = document.getElementById("wa-btn"), msg = document.getElementById("chat-msg");
-const toggle = open => { chat.hidden = !open; waBtn.setAttribute("aria-expanded", open); if (open) msg.focus(); };
-waBtn.onclick = () => toggle(chat.hidden);
+const toggle = open => {
+  chat.classList.toggle("open", open);
+  chat.setAttribute("aria-hidden", !open);
+  waBtn.setAttribute("aria-expanded", open);
+  if (open) setTimeout(() => msg.focus({ preventScroll: true }), 250);
+};
+waBtn.onclick = () => toggle(!chat.classList.contains("open"));
 document.getElementById("chat-close").onclick = () => toggle(false);
 document.querySelectorAll(".quick button").forEach(b => b.onclick = () => { msg.value = b.textContent; msg.focus(); });
 const send = () => {
@@ -505,7 +670,7 @@ const send = () => {
 };
 document.getElementById("chat-form").onsubmit = e => { e.preventDefault(); send(); };
 msg.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
-addEventListener("keydown", e => { if (e.key === "Escape" && !chat.hidden) toggle(false); });
+addEventListener("keydown", e => { if (e.key === "Escape") toggle(false); });
 </script>
 </body>
 </html>
